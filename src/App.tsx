@@ -2,7 +2,7 @@ import reactLogo from "./assets/react.svg";
 import "./App.css";
 import { JWTForm } from "./components/jwt-form";
 import { useState } from "react";
-import { MentorProfileCard } from "./components/mentor-profile-card";
+import { ProfileContainer } from "./components/profile-container";
 
 function App() {
   const [jwt, setJWT] = useState("");
@@ -19,7 +19,7 @@ function App() {
 
       <div className="flex w-1/2 justify-center mx-auto mb-32">
         {!jwt && <JWTForm callback={onJWTUpdated} />}
-        {jwt && <MentorProfileCard jwt={jwt} />}
+        {jwt && <ProfileContainer jwt={jwt} />}
       </div>
     </>
   );

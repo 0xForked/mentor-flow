@@ -1,10 +1,47 @@
 export interface User {
   id: string;
+  nick_name: string;
+  email: string;
 }
 
 export interface Availability {
   id: string;
   user_id: string;
+  label: string;
+  timezone: string;
+  connected_with_google: boolean;
+  connected_with_microsoft: boolean;
+  days?: AvailabilityDays[] | null;
+  installed_apps?: InstalledApp | null;
+}
+
+export interface AvailabilityDays {
+  id: string;
+  enabled: boolean;
+  day: number;
+  start_time: number;
+  end_time: number;
+}
+
+export interface InstalledApp {
+  calendars?: App[] | null
+  conferencing?: App[] | null
+}
+
+export interface App {
+  provider: string;
+  name: string;
+  logo: string;
+  description: string;
+  is_default: string;
+  email?: string;
+}
+
+export interface ProfileStatus {
+  isMentor: boolean
+  availabilityDataExist: boolean
+  calendarAppIntegration: boolean
+  conferenceAppIntegration: boolean
 }
 
 export enum OAuthProvider {
@@ -12,13 +49,13 @@ export enum OAuthProvider {
   MICROSOFT = "microsoft",
 }
 
-const API_URL = "http://localhost:3000/api/v1";
+const API_URL = "http://localhost:3000/api";
 
 export const API_PATH = {
-  PROFILE: `${API_URL}/account`,
-  AVAILABILITY: `${API_URL}/mentor-settings/availabilities`,
-  // OAUTH_WEB_GRANT: (provider: string) =>
-  //   `${API_URL}/mentor-settings/oauth/${provider}`,
+  PROFILE: `${API_URL}/v2/accounts/detail`,
+  AVAILABILITY: `${API_URL}/v1/mentor-settings/availabilities`,
+  OAUTH_WEB_CONNECT: (provider: string) =>
+    `${API_URL}/v1/mentor-settings/oauth/${provider}/connect`,
 };
 
 export const handleResponse = async <T>(response: Response): Promise<T> => {
