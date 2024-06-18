@@ -33,29 +33,31 @@ import { API_PATH, Availability, handleResponse } from "@/lib/user";
 import { useState } from "react";
 import { toast } from "./ui/use-toast";
 
-const AvailabilityFormSchema = z.object({
-  label: z.string(),
-  timezone: z.string()
-});
-
 interface NewAvailabilityDialogProps {
-  jwt?: string
+  jwt?: string;
   callback(availability: Availability): void;
 }
 
+const AvailabilityFormSchema = z.object({
+  label: z.string(),
+  timezone: z.string(),
+});
+
 export function NewAvailabilityDialog(props: NewAvailabilityDialogProps) {
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const form = useForm<z.infer<typeof AvailabilityFormSchema>>({
     resolver: zodResolver(AvailabilityFormSchema),
     defaultValues: {
-      label: 'Working Days',
-      timezone: 'Asia/Singapore',
+      label: "Working Days",
+      timezone: "Asia/Singapore",
     },
   });
 
   async function onSubmit(data: z.infer<typeof AvailabilityFormSchema>) {
     try {
+      setLoading(true);
       const ar = await fetch(API_PATH.AVAILABILITY, {
         method: "POST",
         headers: {
@@ -65,33 +67,31 @@ export function NewAvailabilityDialog(props: NewAvailabilityDialogProps) {
         credentials: "include",
         body: JSON.stringify({
           label: data.label,
-          timezone: data.timezone
-        })
+          timezone: data.timezone,
+        }),
       });
       const availabilityData = await handleResponse<Availability>(ar);
       props?.callback(availabilityData?.data);
     } catch (error) {
-      let em = "An unknown error occurred"
+      let em = "An unknown error occurred";
       if (error instanceof Error) {
-        em = error.message
+        em = error.message;
       }
       toast({
         title: "Error create new Availability",
-        description: (<>{em}</>),
+        description: <>{em}</>,
       });
+    } finally {
+      setLoading(false);
     }
   }
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={() => setOpen(!open)}
-    >
+    <Dialog open={open} onOpenChange={() => setOpen(!open)}>
       <DialogTrigger asChild>
-        <Button
-          className="w-36 mx-auto mt-4"
-          onClick={() => setOpen(true)}
-        >New Availability</Button>
+        <Button className="w-36 mx-auto mt-4" onClick={() => setOpen(true)}>
+          New Availability
+        </Button>
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-[425px]">
@@ -103,7 +103,10 @@ export function NewAvailabilityDialog(props: NewAvailabilityDialogProps) {
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col space-y-6">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex flex-col space-y-6"
+          >
             <div className="grid gap-4">
               <FormField
                 control={form.control}
@@ -148,14 +151,8 @@ export function NewAvailabilityDialog(props: NewAvailabilityDialogProps) {
                 )}
               />
             </div>
-            <Button
-              type="submit"
-              className="w-auto ml-auto"
-              disabled={form.formState.isSubmitted}
-            >
-              {form.formState.isSubmitted && (
-                <Loader2 className="w-4 animate-spin mr-1" />
-              )}
+            <Button type="submit" className="w-auto ml-auto" disabled={loading}>
+              {loading && <Loader2 className="w-4 animate-spin mr-1" />}
               Save changes
             </Button>
           </form>

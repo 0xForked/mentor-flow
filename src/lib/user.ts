@@ -24,8 +24,8 @@ export interface AvailabilityDays {
 }
 
 export interface InstalledApp {
-  calendars?: App[] | null
-  conferencing?: App[] | null
+  calendars?: App[] | null;
+  conferencing?: App[] | null;
 }
 
 export interface App {
@@ -38,10 +38,10 @@ export interface App {
 }
 
 export interface ProfileStatus {
-  isMentor: boolean
-  availabilityDataExist: boolean
-  calendarAppIntegration: boolean
-  conferenceAppIntegration: boolean
+  isMentor: boolean;
+  availabilityDataExist: boolean;
+  calendarAppIntegration: boolean;
+  conferenceAppIntegration: boolean;
 }
 
 export enum OAuthProvider {
@@ -49,12 +49,12 @@ export enum OAuthProvider {
   MICROSOFT = "microsoft",
 }
 
-const API_URL = "http://localhost:3000/api";
+const API_URL = "http://127.0.0.1:3000/api";
 
 export const API_PATH = {
   PROFILE: `${API_URL}/v2/accounts/detail`,
   AVAILABILITY: `${API_URL}/v1/mentor-settings/availabilities`,
-  OAUTH_WEB_CONNECT: (provider: string) =>
+  OAUTH_WEB_CONNECT: (provider: OAuthProvider) =>
     `${API_URL}/v1/mentor-settings/oauth/${provider}/connect`,
 };
 

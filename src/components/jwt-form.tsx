@@ -48,7 +48,9 @@ export function JWTForm(props: JWTFormProps) {
       ),
     });
 
-    setTimeout(() => props.callback(data.jwt), 500);
+    setTimeout(() => {
+      props.callback(data.jwt);
+    }, 500);
   }
 
   return (

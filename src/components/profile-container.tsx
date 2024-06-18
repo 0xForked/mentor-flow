@@ -1,4 +1,10 @@
-import { API_PATH, User, Availability, handleResponse, ProfileStatus } from "@/lib/user";
+import {
+  API_PATH,
+  User,
+  Availability,
+  handleResponse,
+  ProfileStatus,
+} from "@/lib/user";
 import { useCallback, useEffect, useState } from "react";
 import { PackageOpenIcon } from "lucide-react";
 import { NewAvailabilityDialog } from "./new-availability-dialog";
@@ -15,7 +21,7 @@ export function ProfileContainer(props: MentorProfileCardProps) {
     isMentor: false,
     availabilityDataExist: false,
     calendarAppIntegration: false,
-    conferenceAppIntegration: false
+    conferenceAppIntegration: false,
   });
   const [availability, setAvailability] = useState<Availability | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -35,16 +41,19 @@ export function ProfileContainer(props: MentorProfileCardProps) {
         credentials: "include",
       });
       const profileData = await handleResponse<User>(pr);
-      setProfile(profileData?.data);
+      const pd = profileData?.data;
+      setProfile(pd);
       setProfileStatus((prevStatus) => ({
         ...prevStatus,
-        isMentor: profileData != null
+        isMentor: pd != null,
       }));
     } catch (error) {
       console.error("Error fetching data:", error);
       if (error instanceof Response) {
         const errorData = await error.json();
-        setProfileError(errorData.message || "An error occurred while fetching profile data.");
+        setProfileError(
+          errorData.message || "An error occurred while fetching profile data.",
+        );
       } else if (error instanceof Error) {
         setProfileError(error.message);
       } else {
@@ -64,33 +73,37 @@ export function ProfileContainer(props: MentorProfileCardProps) {
         credentials: "include",
       });
       const availabilityData = await handleResponse<Availability>(ar);
-      setAvailability(availabilityData?.data);
+      const ad = availabilityData?.data;
+      setAvailability(ad);
       setProfileStatus((prevStatus) => ({
         ...prevStatus,
-        availabilityDataExist: availabilityData != null,
+        availabilityDataExist: ad != null,
         calendarAppIntegration: (() => {
-          if (availabilityData?.data?.installed_apps == null) {
-            return false
+          if (ad?.installed_apps == null) {
+            return false;
           }
-          if (availabilityData?.data?.installed_apps?.calendars == null) {
-            return false
+          if (ad?.installed_apps?.calendars == null) {
+            return false;
           }
-          return availabilityData?.data?.installed_apps?.calendars?.length > 0
+          return ad?.installed_apps?.calendars?.length > 0;
         })(),
         conferenceAppIntegration: (() => {
-          if (availabilityData?.data?.installed_apps == null) {
-            return false
+          if (ad?.installed_apps == null) {
+            return false;
           }
-          if (availabilityData?.data?.installed_apps?.conferencing == null) {
-            return false
+          if (ad?.installed_apps?.conferencing == null) {
+            return false;
           }
-          return availabilityData?.data?.installed_apps?.conferencing?.length > 0
-        })()
+          return ad?.installed_apps?.conferencing?.length > 0;
+        })(),
       }));
     } catch (error) {
       if (error instanceof Response) {
         const errorData = await error.json();
-        setAvailabilityError(errorData.message || "An error occurred while fetching availability data.");
+        setAvailabilityError(
+          errorData.message ||
+            "An error occurred while fetching availability data.",
+        );
       } else if (error instanceof Error) {
         setAvailabilityError(error.message);
       } else {
@@ -104,44 +117,46 @@ export function ProfileContainer(props: MentorProfileCardProps) {
       window.location.reload();
       return;
     }
-    (async () => {
-      try {
-        setLoading(true);
-        setProfileError(null);
-        setAvailabilityError(null);
-        await getProfile();
-        await getAvailability();
-      } finally {
-        setLoading(false);
-      }
-    })();
+
+    return () => {
+      (async () => {
+        try {
+          setLoading(true);
+          setProfileError(null);
+          setAvailabilityError(null);
+          await Promise.all([getProfile(), getAvailability()]);
+        } finally {
+          setLoading(false);
+        }
+      })();
+    };
   }, [props.jwt, getProfile, getAvailability]);
 
   const newAvailability = (data: Availability) => {
-    setAvailability(data)
+    setAvailability(data);
     setProfileStatus((prevStatus) => ({
       ...prevStatus,
       availabilityDataExist: data != null,
       calendarAppIntegration: (() => {
         if (data?.installed_apps == null) {
-          return false
+          return false;
         }
         if (data?.installed_apps?.calendars == null) {
-          return false
+          return false;
         }
-        return data?.installed_apps?.calendars?.length > 0
+        return data?.installed_apps?.calendars?.length > 0;
       })(),
       conferenceAppIntegration: (() => {
         if (data?.installed_apps == null) {
-          return false
+          return false;
         }
         if (data?.installed_apps?.conferencing == null) {
-          return false
+          return false;
         }
-        return data?.installed_apps?.conferencing?.length > 0
-      })()
+        return data?.installed_apps?.conferencing?.length > 0;
+      })(),
     }));
-  }
+  };
 
   const NoAvailability = () => (
     <>
@@ -172,14 +187,13 @@ export function ProfileContainer(props: MentorProfileCardProps) {
       <aside className="relative w-full overflow-hidden rounded-r-xl border border-dashed border-gray-400 opacity-75 p-4 col-span-2">
         Availability
         <hr className="border-dashed my-4" />
-        {
-          !loading && !availability &&
-          availabilityError?.includes("404") &&
+        {!loading && !availability && availabilityError?.includes("404") && (
           <NoAvailability />
-        }
+        )}
         <AvailabilityCard
           loading={loading}
           error={availabilityError}
+          jwt={props.jwt}
           availability={availability}
         />
       </aside>
