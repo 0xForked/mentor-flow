@@ -102,7 +102,7 @@ export function ProfileContainer(props: MentorProfileCardProps) {
         const errorData = await error.json();
         setAvailabilityError(
           errorData.message ||
-            "An error occurred while fetching availability data.",
+          "An error occurred while fetching availability data.",
         );
       } else if (error instanceof Error) {
         setAvailabilityError(error.message);
@@ -187,15 +187,16 @@ export function ProfileContainer(props: MentorProfileCardProps) {
       <aside className="relative w-full overflow-hidden rounded-r-xl border border-dashed border-gray-400 opacity-75 p-4 col-span-2">
         Availability
         <hr className="border-dashed my-4" />
-        {!loading && !availability && availabilityError?.includes("404") && (
+        {!loading && !availability && availabilityError?.includes("404") ? (
           <NoAvailability />
+        ) : (
+          <AvailabilityCard
+            loading={loading}
+            error={availabilityError}
+            jwt={props.jwt}
+            availability={availability}
+          />
         )}
-        <AvailabilityCard
-          loading={loading}
-          error={availabilityError}
-          jwt={props.jwt}
-          availability={availability}
-        />
       </aside>
     </main>
   );

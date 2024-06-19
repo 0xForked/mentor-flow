@@ -17,6 +17,7 @@ import { ArrowLeftIcon, Clock, Globe, Loader2 } from "lucide-react";
 import { Badge } from "./ui/badge";
 import { useState } from "react";
 import { toast } from "./ui/use-toast";
+import { capitalizeFirstChar } from "@/lib/utils";
 
 interface AvailabilityProps {
   loading: boolean;
@@ -167,20 +168,25 @@ export function AvailabilityCard(props: AvailabilityProps) {
         ))}
       </section>
       <section className="space-y-4">
-        {!props?.availability?.connected_with_google && <ConnectWithGoogle />}
-        {props?.availability?.connected_with_google && <InstalledGoogleApp />}
-        {!props?.availability?.connected_with_microsoft && (
-          <ConnectWithMicrosoft />
-        )}
+        {
+          !props?.availability?.connected_with_google
+            ? (<ConnectWith provider={OAuthProvider.GOOGLE} />)
+            : (<InstalledApp provider={OAuthProvider.GOOGLE} />)
+        }
+        {
+          !props?.availability?.connected_with_microsoft
+            ? (<ConnectWith provider={OAuthProvider.MICROSOFT} />)
+            : (<InstalledApp provider={OAuthProvider.MICROSOFT} />)
+        }
       </section>
     </>
   );
 
-  const InstalledGoogleApp = () => (
+  const InstalledApp = (v: { provider: OAuthProvider }) => (
     <>
       <section className="bg-gray-100 relative rounded-md divide-y divide-dashed">
         {props?.availability?.installed_apps?.calendars
-          ?.filter((item) => item.provider === "google")
+          ?.filter((item) => item.provider === v.provider)
           .map((item, index) => (
             <div className="flex flex-row gap-4 p-4" key={index}>
               <img
@@ -195,18 +201,18 @@ export function AvailabilityCard(props: AvailabilityProps) {
                   prevent double bookings
                 </p>
                 <div className="flex flex-row items-center gap-2 mt-4">
-                  <Switch checked={!!item.is_default} />
-                  <span>{item.email}</span>
-                  <Badge className="bg-gray-200 text-black hover:bg-gray-200 hover:text-black py-1 rounded-sm">
+                  <Switch checked={true} />
+                  <span>{item.email} (Calendar)</span>
+                  {item.is_default && <Badge className="bg-gray-200 text-black hover:bg-gray-200 hover:text-black py-1 rounded-sm">
                     <ArrowLeftIcon className="h-4 w-4 mr-2" />
                     <span className="text-xs">Adding events to</span>
-                  </Badge>
+                  </Badge>}
                 </div>
               </div>
             </div>
           ))}
         {props?.availability?.installed_apps?.conferencing
-          ?.filter((item) => item.provider === "google")
+          ?.filter((item) => item.provider === v.provider)
           .map((item, index) => (
             <div className="flex flex-row gap-4 p-4" key={index}>
               <img
@@ -225,16 +231,13 @@ export function AvailabilityCard(props: AvailabilityProps) {
                 </h5>
                 <p className="text-xs text-gray-600">{item.description}</p>
               </div>
-              {/* <Button className="w-10 bg-gray-300 hover:bg-gray-400 my-auto rounded-md">
-              <EllipsisVertical className="h-24 text-black" />
-            </Button> */}
             </div>
           ))}
       </section>
     </>
   );
 
-  const ConnectWithGoogle = () => (
+  const ConnectWith = (v: { provider: OAuthProvider }) => (
     <>
       <div className="relative">
         <div className="bg-gray-600 w-full h-full absolute top-0 left-0 opacity-40 rounded-md z-10"></div>
@@ -242,106 +245,87 @@ export function AvailabilityCard(props: AvailabilityProps) {
           <Button
             className="font-normal w-56"
             disabled={loading}
-            onClick={() => issueNewOAuthURL(OAuthProvider.GOOGLE)}
+            onClick={() => issueNewOAuthURL(v.provider)}
           >
             {loading ? (
               <Loader2 className="w-4 animate-spin mr-1" />
             ) : (
               <img
-                className="w-6 h-6 mr-2"
-                src={googleLogo}
-                alt="google-logo"
+                className={
+                  v.provider == OAuthProvider.GOOGLE
+                    ? "w-6 h-6 mr-2" : "w-[20px] h-[20px] mr-2"
+                }
+                src={
+                  v.provider == OAuthProvider.GOOGLE
+                    ? googleLogo : microsoftLogo
+                }
+                alt={v.provider + "-logo"}
               />
             )}
-            Connect with Google
+            Connect with {capitalizeFirstChar(v.provider)}
           </Button>
         </div>
         <section className="bg-gray-100 relative rounded-md divide-y divide-dashed">
           <div className="flex flex-row gap-4 p-4">
             <img
               className="h-8 w-8 mt-2"
-              src="https://stgreenskills001.blob.core.windows.net/assets/google-calendar-logo.svg"
-              alt="google-calendar-logo"
-            />
-            <div className="relative overflow-auto">
-              <h5 className="text-md font-semibold">Google Calendar</h5>
-              <p className="text-xs text-gray-600 truncate overflow-hidden ...">
-                Google Calendar is a time management and scheduling service
-                developed by Google. Allows users to create and edit events,
-                with options available for type and time. Available to anyone
-                that has a Gmail account on both mobile and web versions.
-              </p>
-            </div>
-          </div>
-          <div className="flex flex-row gap-4 p-4">
-            <img
-              className="h-10 w-10"
-              src="https://stgreenskills001.blob.core.windows.net/assets/google-meet-logo.webp"
-              alt="google-meet-logo"
-            />
-            <div className="relative overflow-auto">
-              <h5 className="text-md font-semibold">Google Meet</h5>
-              <p className="text-xs text-gray-600 truncate overflow-hidden ...">
-                Google Meet is Google's web-based video conferencing platform,
-                designed to compete with major conferencing platforms.
-              </p>
-            </div>
-          </div>
-        </section>
-      </div>
-    </>
-  );
-
-  const ConnectWithMicrosoft = () => (
-    <>
-      <div className="relative">
-        <div className="bg-gray-600 w-full h-full absolute top-0 left-0 opacity-40 rounded-md z-10"></div>
-        <div className="bg-gray-700 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 px-12 py-4 rounded-md z-20 bg-opacity-60">
-          <Button className="font-normal w-56">
-            <img
-              className="w-[20px] h-[20px] mr-2"
-              src={microsoftLogo}
-              alt="microsoft-logo"
-            />
-            Connect with Microsoft
-          </Button>
-        </div>
-        <section className="bg-gray-100 relative rounded-md divide-y divide-dashed">
-          <div className="flex flex-row gap-4 p-4">
-            <img
-              className="h-8 w-8 mt-2"
-              src="https://stgreenskills001.blob.core.windows.net/assets/outlock-calendar-logo.svg"
-              alt="outlock-calendar-logo"
-            />
-            <div className="relative overflow-auto">
-              <h5 className="text-md font-semibold">Outlook Calendar</h5>
-              <p className="text-xs text-gray-600 truncate overflow-hidden ...">
-                Microsoft Office 365 is a suite of apps that helps you stay
-                connected with others and get things done. It includes but is
-                not limited to Microsoft Word, PowerPoint, Excel, Teams, OneNote
-                and OneDrive. Office 365 allows you to work remotely with others
-                on a team and collaborate in an online environment. Both web
-                versions and desktop/mobile applications are available.
-              </p>
-            </div>
-          </div>
-          <div className="flex flex-row gap-4 p-4">
-            <img
-              className="h-8 w-8"
-              src="https://stgreenskills001.blob.core.windows.net/assets/microsoft-team-logo.svg"
-              alt="meet"
+              src={
+                v.provider == OAuthProvider.GOOGLE
+                  ? "https://stgreenskills001.blob.core.windows.net/assets/google-calendar-logo.svg"
+                  : "https://stgreenskills001.blob.core.windows.net/assets/outlock-calendar-logo.svg"
+              }
+              alt={v.provider + "-calendar-logo"}
             />
             <div className="relative overflow-auto">
               <h5 className="text-md font-semibold">
-                Microsoft 365/Teams (Requires work/school account)
+                {v.provider == OAuthProvider.GOOGLE ? "Google" : "Outlook"} Calendar
               </h5>
               <p className="text-xs text-gray-600 truncate overflow-hidden ...">
-                Microsoft Teams is a business communication platform and
-                collaborative workspace included in Microsoft 365. It offers
-                workspace chat and video conferencing, file storage, and
-                application integration. Both web versions and desktop/mobile
-                applications are available. NOTE: MUST HAVE A WORK / SCHOOL
-                ACCOUNT
+                {v.provider == OAuthProvider.GOOGLE
+                  ? `Google Calendar is a time management and scheduling service
+                developed by Google. Allows users to create and edit events,
+                with options available for type and time. Available to anyone
+                that has a Gmail account on both mobile and web versions.`
+                  : ` Microsoft Office 365 is a suite of apps that helps you stay
+                  connected with others and get things done. It includes but is
+                  not limited to Microsoft Word, PowerPoint, Excel, Teams, OneNote
+                  and OneDrive. Office 365 allows you to work remotely with others
+                  on a team and collaborate in an online environment. Both web
+                  versions and desktop/mobile applications are available.`
+                }
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-row gap-4 p-4">
+            <img
+              className={
+                v.provider == OAuthProvider.GOOGLE
+                  ? "h-10 w-10" : "h-8 w-8"
+              }
+              src={
+                v.provider == OAuthProvider.GOOGLE
+                  ? "https://stgreenskills001.blob.core.windows.net/assets/google-meet-logo.webp"
+                  : "https://stgreenskills001.blob.core.windows.net/assets/microsoft-team-logo.svg"
+              }
+              alt={v.provider + "-conferece-logo"}
+            />
+            <div className="relative overflow-auto">
+              <h5 className="text-md font-semibold">
+                {v.provider == OAuthProvider.GOOGLE
+                  ? "Google Meet" : "Microsoft 365/Teams (Requires work/school account)"
+                }
+              </h5>
+              <p className="text-xs text-gray-600 truncate overflow-hidden ...">
+                {v.provider == OAuthProvider.GOOGLE
+                  ? ` Google Meet is Google's web-based video conferencing platform,
+                designed to compete with major conferencing platforms.`
+                  : `Microsoft Teams is a business communication platform and
+                  collaborative workspace included in Microsoft 365. It offers
+                  workspace chat and video conferencing, file storage, and
+                  application integration. Both web versions and desktop/mobile
+                  applications are available. NOTE: MUST HAVE A WORK / SCHOOL
+                  ACCOUNT`
+                }
               </p>
             </div>
           </div>
@@ -352,7 +336,6 @@ export function AvailabilityCard(props: AvailabilityProps) {
 
   const issueNewOAuthURL = async (provider: OAuthProvider) => {
     if (!provider) return;
-
     try {
       setLoading(true);
       const resp = await fetch(API_PATH.OAUTH_WEB_CONNECT(provider), {
@@ -381,8 +364,11 @@ export function AvailabilityCard(props: AvailabilityProps) {
 
   return (
     <>
-      {props?.loading && <AvailabilitySkeleton />}
-      {!props?.loading && props.availability && <AvailabilitySection />}
+      {props?.loading && !props?.availability ? (
+        <AvailabilitySkeleton />
+      ) : (
+        <AvailabilitySection />
+      )}
     </>
   );
 }
