@@ -21,7 +21,7 @@ export interface AvailabilityDay {
   day: number;
   start_time: number;
   end_time: number;
-  extend_times?: ExtendTime[] | null
+  extend_times?: ExtendTime[] | null;
 }
 
 export interface ExtendTime {
@@ -61,6 +61,8 @@ const API_URL = "http://127.0.0.1:3000/api";
 export const API_PATH = {
   PROFILE: `${API_URL}/v2/accounts/detail`,
   AVAILABILITY: `${API_URL}/v1/mentor-settings/availabilities`,
+  AVAILABILITY_EXTEND_TIME: (dayId: string, timeId: string) =>
+    `${API_URL}/v1/mentor-settings/availabilities/days/${dayId}/extend-times/${timeId}`,
   OAUTH_WEB_CONNECT: (provider: OAuthProvider) =>
     `${API_URL}/v1/mentor-settings/oauth/${provider}/connect`,
 };

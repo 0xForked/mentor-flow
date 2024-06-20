@@ -62,6 +62,11 @@ export function ProfileContainer(props: MentorProfileCardProps) {
     }
   }, [props.jwt]);
 
+  const updateAvailability = useCallback(async (data: Availability) => {
+    setAvailability(data);
+    updateProfileStatus(data);
+  }, []);
+
   const getAvailability = useCallback(async () => {
     try {
       const ar = await fetch(API_PATH.AVAILABILITY, {
@@ -74,35 +79,13 @@ export function ProfileContainer(props: MentorProfileCardProps) {
       });
       const availabilityData = await handleResponse<Availability>(ar);
       const ad = availabilityData?.data;
-      setAvailability(ad);
-      setProfileStatus((prevStatus) => ({
-        ...prevStatus,
-        availabilityDataExist: ad != null,
-        calendarAppIntegration: (() => {
-          if (ad?.installed_apps == null) {
-            return false;
-          }
-          if (ad?.installed_apps?.calendars == null) {
-            return false;
-          }
-          return ad?.installed_apps?.calendars?.length > 0;
-        })(),
-        conferenceAppIntegration: (() => {
-          if (ad?.installed_apps == null) {
-            return false;
-          }
-          if (ad?.installed_apps?.conferencing == null) {
-            return false;
-          }
-          return ad?.installed_apps?.conferencing?.length > 0;
-        })(),
-      }));
+      updateAvailability(ad);
     } catch (error) {
       if (error instanceof Response) {
         const errorData = await error.json();
         setAvailabilityError(
           errorData.message ||
-          "An error occurred while fetching availability data.",
+            "An error occurred while fetching availability data.",
         );
       } else if (error instanceof Error) {
         setAvailabilityError(error.message);
@@ -110,30 +93,9 @@ export function ProfileContainer(props: MentorProfileCardProps) {
         setAvailabilityError("An unknown error occurred");
       }
     }
-  }, [props.jwt]);
+  }, [props.jwt, updateAvailability]);
 
-  useEffect(() => {
-    if (!props.jwt) {
-      window.location.reload();
-      return;
-    }
-
-    return () => {
-      (async () => {
-        try {
-          setLoading(true);
-          setProfileError(null);
-          setAvailabilityError(null);
-          await Promise.all([getProfile(), getAvailability()]);
-        } finally {
-          setLoading(false);
-        }
-      })();
-    };
-  }, [props.jwt, getProfile, getAvailability]);
-
-  const newAvailability = (data: Availability) => {
-    setAvailability(data);
+  const updateProfileStatus = (data: Availability) => {
     setProfileStatus((prevStatus) => ({
       ...prevStatus,
       availabilityDataExist: data != null,
@@ -158,6 +120,26 @@ export function ProfileContainer(props: MentorProfileCardProps) {
     }));
   };
 
+  useEffect(() => {
+    if (!props.jwt) {
+      window.location.reload();
+      return;
+    }
+
+    return () => {
+      (async () => {
+        try {
+          setLoading(true);
+          setProfileError(null);
+          setAvailabilityError(null);
+          await Promise.all([getProfile(), getAvailability()]);
+        } finally {
+          setLoading(false);
+        }
+      })();
+    };
+  }, [props.jwt, getProfile, getAvailability]);
+
   const NoAvailability = () => (
     <>
       <div className="flex flex-col">
@@ -167,7 +149,7 @@ export function ProfileContainer(props: MentorProfileCardProps) {
           We couldn't find your availability. Please create new availability
           data!
         </p>
-        <NewAvailabilityDialog jwt={props.jwt} callback={newAvailability} />
+        <NewAvailabilityDialog jwt={props.jwt} callback={updateAvailability} />
       </div>
     </>
   );
@@ -195,6 +177,7 @@ export function ProfileContainer(props: MentorProfileCardProps) {
             error={availabilityError}
             jwt={props.jwt}
             availability={availability}
+            callback={updateAvailability}
           />
         )}
       </aside>

@@ -1,4 +1,11 @@
-import { API_PATH, Availability, AvailabilityDay, ExtendTime, OAuthProvider } from "@/lib/user";
+import {
+  API_PATH,
+  Availability,
+  AvailabilityDay,
+  ExtendTime,
+  OAuthProvider,
+  handleResponse,
+} from "@/lib/user";
 import { Skeleton } from "./ui/skeleton";
 import googleLogo from "../assets/google.webp";
 import microsoftLogo from "../assets/microsoft.png";
@@ -13,24 +20,36 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { ArrowLeftIcon, Clock, Globe, Loader2, PlusIcon, TrashIcon } from "lucide-react";
+import {
+  ArrowLeftIcon,
+  Clock,
+  Globe,
+  Loader2,
+  PlusIcon,
+  TrashIcon,
+} from "lucide-react";
 import { Badge } from "./ui/badge";
-import { Fragment, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "./ui/use-toast";
-import { capitalizeFirstChar, generateId } from "@/lib/utils";
+import { capitalizeFirstChar } from "@/lib/utils";
 
 interface AvailabilityProps {
   loading: boolean;
   error?: string | null;
   jwt?: string;
   availability?: Availability | null;
+  callback(availability: Availability): void;
+}
+
+interface LoadingStates {
+  [key: string]: boolean;
 }
 
 export function AvailabilityCard(props: AvailabilityProps) {
-  const [loading, setLoading] = useState({ google: false, microsoft: false });
-  const [availability, setAvailability] = useState(props.availability)
+  const [availability, setAvailability] = useState(props.availability);
+  const [loadingStates, setLoadingStates] = useState<LoadingStates>({});
 
-  useEffect(() => setAvailability(props.availability), [props])
+  useEffect(() => setAvailability(props.availability), [props]);
 
   const AvailabilitySkeleton = () => (
     <>
@@ -120,21 +139,35 @@ export function AvailabilityCard(props: AvailabilityProps) {
             key={index}
           >
             <div className="flex h-[36px] items-center gap-4 md:w-32">
-              <Switch
-                onCheckedChange={(checked: boolean) => onDayStateChange(checked, day.id)}
-                defaultChecked={day.enabled}
-              />
+              {loadingStates[`switch-${day.id}`] ? (
+                <Loader2 className="w-12 animate-spin" />
+              ) : (
+                <Switch
+                  onCheckedChange={(checked: boolean) =>
+                    onDayStateChange(checked, day)
+                  }
+                  defaultChecked={day.enabled}
+                />
+              )}
               <span>{intToDay(day.day)}</span>
             </div>
             <div className="flex sm:gap-2">
-              {day.enabled &&
+              {day.enabled && (
                 <div className="flex flex-col gap-2">
                   <div className="flex gap-1 last:mb-0 sm:gap-2">
                     <div className="flex flex-row gap-2 items-center">
                       <DayRage item={day} itemType="main" />
                     </div>
-                    <Button variant="ghost" onClick={() => addNewExtendTime(day.id)}>
-                      <PlusIcon className="w-4 h-4" />
+                    <Button
+                      variant="ghost"
+                      onClick={() => addNewExtendTime(day)}
+                      disabled={loadingStates[day.id]}
+                    >
+                      {loadingStates[day.id] ? (
+                        <Loader2 className="w-4 animate-spin" />
+                      ) : (
+                        <PlusIcon className="w-4 h-4" />
+                      )}
                     </Button>
                   </div>
                   {day?.extend_times?.map((time, index) => (
@@ -142,42 +175,57 @@ export function AvailabilityCard(props: AvailabilityProps) {
                       <div className="flex flex-row gap-2 items-center">
                         <DayRage item={time} itemType="extend" />
                       </div>
-                      <Button variant="ghost" onClick={() => removeExtendTime(day.id, time.id)}>
-                        <TrashIcon className="w-4 h-4" />
+                      <Button
+                        variant="ghost"
+                        onClick={() => removeExtendTime(day.id, time.id)}
+                        disabled={loadingStates[time.id]}
+                      >
+                        {loadingStates[time.id] ? (
+                          <Loader2 className="w-4 animate-spin" />
+                        ) : (
+                          <TrashIcon className="w-4 h-4" />
+                        )}
                       </Button>
                     </div>
                   ))}
-                </div>}
+                </div>
+              )}
             </div>
           </div>
         ))}
       </section>
       <section className="space-y-4">
-        {
-          !availability?.connected_with_google
-            ? (<ConnectWith provider={OAuthProvider.GOOGLE} />)
-            : (<InstalledApp provider={OAuthProvider.GOOGLE} />)
-        }
-        {
-          !availability?.connected_with_microsoft
-            ? (<ConnectWith provider={OAuthProvider.MICROSOFT} />)
-            : (<InstalledApp provider={OAuthProvider.MICROSOFT} />)
-        }
+        {!availability?.connected_with_google ? (
+          <ConnectWith provider={OAuthProvider.GOOGLE} />
+        ) : (
+          <InstalledApp provider={OAuthProvider.GOOGLE} />
+        )}
+        {!availability?.connected_with_microsoft ? (
+          <ConnectWith provider={OAuthProvider.MICROSOFT} />
+        ) : (
+          <InstalledApp provider={OAuthProvider.MICROSOFT} />
+        )}
       </section>
     </>
   );
 
-  const DayRage = (v: { item: AvailabilityDay | ExtendTime, itemType: string }) => (
+  const DayRage = (v: {
+    item: AvailabilityDay | ExtendTime;
+    itemType: string;
+  }) => (
     <>
       <Select
-        disabled={v.itemType != "extend" ? !(v.item as AvailabilityDay).enabled : false}
+        disabled={
+          v.itemType != "extend" ? !(v.item as AvailabilityDay).enabled : false
+        }
         defaultValue={intToTime(v.item.start_time)}
       >
         <SelectTrigger className="w-[100px]">
           <SelectValue placeholder="Start" />
         </SelectTrigger>
         <SelectContent>
-          {((v.itemType == "main" && (v.item as AvailabilityDay).enabled) || v.itemType == "extend") && (
+          {((v.itemType == "main" && (v.item as AvailabilityDay).enabled) ||
+            v.itemType == "extend") && (
             <SelectGroup>
               {timeReference.map((time, index) => (
                 <SelectItem key={index} value={time}>
@@ -190,14 +238,17 @@ export function AvailabilityCard(props: AvailabilityProps) {
       </Select>
       <span>-</span>
       <Select
-        disabled={v.itemType != "extend" ? !(v.item as AvailabilityDay).enabled : false}
+        disabled={
+          v.itemType != "extend" ? !(v.item as AvailabilityDay).enabled : false
+        }
         defaultValue={intToTime(v.item.end_time)}
       >
         <SelectTrigger className="w-[100px]">
           <SelectValue placeholder="End" />
         </SelectTrigger>
         <SelectContent>
-          {((v.itemType == "main" && (v.item as AvailabilityDay).enabled) || v.itemType == "extend") && (
+          {((v.itemType == "main" && (v.item as AvailabilityDay).enabled) ||
+            v.itemType == "extend") && (
             <SelectGroup>
               {timeReference.map((time, index) => (
                 <SelectItem key={index} value={time}>
@@ -209,7 +260,7 @@ export function AvailabilityCard(props: AvailabilityProps) {
         </SelectContent>
       </Select>
     </>
-  )
+  );
 
   const InstalledApp = (v: { provider: OAuthProvider }) => (
     <>
@@ -232,13 +283,17 @@ export function AvailabilityCard(props: AvailabilityProps) {
                 <div className="flex flex-row items-center gap-2 mt-4">
                   <Switch
                     defaultChecked={true}
-                    onCheckedChange={(checked: boolean) => onCalendarStateChange(checked, v.provider)}
+                    onCheckedChange={(checked: boolean) =>
+                      onCalendarStateChange(checked, v.provider)
+                    }
                   />
                   <span className="text-xs">{item.email} (Calendar)</span>
-                  {item.is_default && <Badge className="bg-gray-200 text-black hover:bg-gray-200 hover:text-black py-1 rounded-sm">
-                    <ArrowLeftIcon className="h-4 w-4 mr-2" />
-                    Adding events to
-                  </Badge>}
+                  {item.is_default && (
+                    <Badge className="bg-gray-200 text-black hover:bg-gray-200 hover:text-black py-1 rounded-sm">
+                      <ArrowLeftIcon className="h-4 w-4 mr-2" />
+                      Adding events to
+                    </Badge>
+                  )}
                 </div>
               </div>
             </div>
@@ -274,41 +329,30 @@ export function AvailabilityCard(props: AvailabilityProps) {
       <div className="relative">
         <div className="bg-gray-600 w-full h-full absolute top-0 left-0 opacity-40 rounded-md z-10"></div>
         <div className="bg-gray-700 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 px-12 py-4 rounded-md z-20 bg-opacity-60">
-          {v.provider == OAuthProvider.GOOGLE ? (
-            <Button
-              className="font-normal w-56"
-              disabled={loading.google}
-              onClick={() => issueNewOAuthURL(v.provider)}
-            >
-              {loading.google ? (
-                <Loader2 className="w-4 animate-spin mr-1" />
-              ) : (
-                <img
-                  className="w-6 h-6 mr-2"
-                  src={googleLogo}
-                  alt={v.provider + "-logo"}
-                />
-              )}
-              Connect with {capitalizeFirstChar(v.provider)}
-            </Button>
-          ) : (
-            <Button
-              className="font-normal w-56"
-              disabled={loading.microsoft}
-              onClick={() => issueNewOAuthURL(v.provider)}
-            >
-              {loading.microsoft ? (
-                <Loader2 className="w-4 animate-spin mr-1" />
-              ) : (
-                <img
-                  className="w-[20px] h-[20px] mr-2"
-                  src={microsoftLogo}
-                  alt={v.provider + "-logo"}
-                />
-              )}
-              Connect with {capitalizeFirstChar(v.provider)}
-            </Button>
-          )}
+          <Button
+            className="font-normal w-56"
+            disabled={loadingStates[v.provider]}
+            onClick={() => issueNewOAuthURL(v.provider)}
+          >
+            {loadingStates[v.provider] ? (
+              <Loader2 className="w-4 animate-spin mr-1" />
+            ) : (
+              <img
+                className={
+                  v.provider == OAuthProvider.GOOGLE
+                    ? "w-6 h-6 mr-2"
+                    : "w-[20px] h-[20px] mr-2"
+                }
+                src={
+                  v.provider == OAuthProvider.GOOGLE
+                    ? googleLogo
+                    : microsoftLogo
+                }
+                alt={v.provider + "-logo"}
+              />
+            )}
+            Connect with {capitalizeFirstChar(v.provider)}
+          </Button>
         </div>
         <section className="bg-gray-100 relative rounded-md divide-y divide-dashed">
           <div className="flex flex-row gap-4 p-4">
@@ -323,7 +367,8 @@ export function AvailabilityCard(props: AvailabilityProps) {
             />
             <div className="relative overflow-auto">
               <h5 className="text-md font-semibold">
-                {v.provider == OAuthProvider.GOOGLE ? "Google" : "Outlook"} Calendar
+                {v.provider == OAuthProvider.GOOGLE ? "Google" : "Outlook"}{" "}
+                Calendar
               </h5>
               <p className="text-xs text-gray-600 truncate overflow-hidden ...">
                 {v.provider == OAuthProvider.GOOGLE
@@ -336,16 +381,14 @@ export function AvailabilityCard(props: AvailabilityProps) {
                   not limited to Microsoft Word, PowerPoint, Excel, Teams, OneNote
                   and OneDrive. Office 365 allows you to work remotely with others
                   on a team and collaborate in an online environment. Both web
-                  versions and desktop/mobile applications are available.`
-                }
+                  versions and desktop/mobile applications are available.`}
               </p>
             </div>
           </div>
           <div className="flex flex-row gap-4 p-4">
             <img
               className={
-                v.provider == OAuthProvider.GOOGLE
-                  ? "h-10 w-10" : "h-8 w-8"
+                v.provider == OAuthProvider.GOOGLE ? "h-10 w-10" : "h-8 w-8"
               }
               src={
                 v.provider == OAuthProvider.GOOGLE
@@ -357,8 +400,8 @@ export function AvailabilityCard(props: AvailabilityProps) {
             <div className="relative overflow-auto">
               <h5 className="text-md font-semibold">
                 {v.provider == OAuthProvider.GOOGLE
-                  ? "Google Meet" : "Microsoft 365/Teams (Requires work/school account)"
-                }
+                  ? "Google Meet"
+                  : "Microsoft 365/Teams (Requires work/school account)"}
               </h5>
               <p className="text-xs text-gray-600 truncate overflow-hidden ...">
                 {v.provider == OAuthProvider.GOOGLE
@@ -369,8 +412,7 @@ export function AvailabilityCard(props: AvailabilityProps) {
                   workspace chat and video conferencing, file storage, and
                   application integration. Both web versions and desktop/mobile
                   applications are available. NOTE: MUST HAVE A WORK / SCHOOL
-                  ACCOUNT`
-                }
+                  ACCOUNT`}
               </p>
             </div>
           </div>
@@ -382,10 +424,7 @@ export function AvailabilityCard(props: AvailabilityProps) {
   const issueNewOAuthURL = async (provider: OAuthProvider) => {
     if (!provider) return;
     try {
-      setLoading({
-        google: provider == OAuthProvider.GOOGLE,
-        microsoft: provider == OAuthProvider.MICROSOFT
-      });
+      setLoadingStates((prevState) => ({ ...prevState, [provider]: true }));
       const resp = await fetch(API_PATH.OAUTH_WEB_CONNECT(provider), {
         method: "POST",
         headers: {
@@ -406,76 +445,151 @@ export function AvailabilityCard(props: AvailabilityProps) {
         description: <>{em}</>,
       });
     } finally {
-      setLoading({
-        google: false,
-        microsoft: false
-      });
+      setLoadingStates((prevState) => ({ ...prevState, [provider]: false }));
     }
   };
 
-  const onDayStateChange = (state: boolean, id: string) => {
-    if (!availability || !id) return;
-    const newAvailability = {
-      ...availability,
-      days: availability.days?.map(item => {
-        if (item.id === id) {
-          return { ...item, enabled: state };
-        }
-        return item;
-      })
-    };
-    setAvailability(newAvailability)
-  }
+  const onDayStateChange = async (state: boolean, day: AvailabilityDay) => {
+    if (!day) return;
+    try {
+      setLoadingStates((prevState) => ({
+        ...prevState,
+        [`switch-${day.id}`]: true,
+      }));
+      const req = await saveChanges(
+        JSON.stringify({
+          days: [
+            {
+              id: day.id,
+              enabled: state,
+              start_time: day.start_time,
+              end_time: day.end_time,
+            },
+          ],
+        }),
+      );
+      const resp = await handleResponse<Availability>(req);
+      const availabilityData = resp?.data;
+      props.callback(availabilityData);
+    } catch (error) {
+      let em = "An unknown error occurred";
+      if (error instanceof Error) {
+        em = error.message;
+      }
+      toast({
+        title: "Failed to update day",
+        description: <>{em}</>,
+      });
+    } finally {
+      setLoadingStates((prevState) => ({
+        ...prevState,
+        [`switch-${day.id}`]: false,
+      }));
+    }
+  };
 
-  const addNewExtendTime = (id: string) => {
-    if (!availability || !id) return;
-    const newAvailability = {
-      ...availability,
-      days: availability.days?.map(day => {
-        if (day.id === id) {
-          const extendTimes = day.extend_times || [];
-          const newExtendTime: ExtendTime = {
-            id: generateId(),
-            start_time: day.end_time,
-            end_time: addOneHour(day.end_time),
-          };
-          if (extendTimes.length > 0) {
-            const lastExtendTime = extendTimes[extendTimes.length - 1];
-            newExtendTime.start_time = lastExtendTime.end_time;
-            newExtendTime.end_time = addOneHour(lastExtendTime.end_time);
-          }
+  const addNewExtendTime = async (day: AvailabilityDay) => {
+    if (!day) return;
+    try {
+      setLoadingStates((prevState) => ({ ...prevState, [day.id]: true }));
+      const extendTimes = day.extend_times || [];
+      const newExtendTime: ExtendTime = {
+        id: "",
+        start_time: day.end_time,
+        end_time: addOneHour(day.end_time),
+      };
+      if (extendTimes.length > 0) {
+        const lastExtendTime = extendTimes[extendTimes.length - 1];
+        newExtendTime.start_time = lastExtendTime.end_time;
+        newExtendTime.end_time = addOneHour(lastExtendTime.end_time);
+      }
+      const updatedExtendTimes = [...extendTimes, newExtendTime];
+      const req = await saveChanges(
+        JSON.stringify({
+          days: [
+            {
+              id: day.id,
+              enabled: day.enabled,
+              start_time: day.start_time,
+              end_time: day.end_time,
+              extend_times: updatedExtendTimes,
+            },
+          ],
+        }),
+      );
+      const resp = await handleResponse<Availability>(req);
+      const availabilityData = resp?.data;
+      props.callback(availabilityData);
+    } catch (error) {
+      let em = "An unknown error occurred";
+      if (error instanceof Error) {
+        em = error.message;
+      }
+      toast({
+        title: "Failed to add extend time",
+        description: <>{em}</>,
+      });
+    } finally {
+      setLoadingStates((prevState) => ({ ...prevState, [day.id]: false }));
+    }
+  };
+
+  const removeExtendTime = async (dayId: string, timeId: string) => {
+    if (!dayId || !timeId || !availability?.days) return;
+    try {
+      setLoadingStates((prevState) => ({ ...prevState, [timeId]: true }));
+      await fetch(API_PATH.AVAILABILITY_EXTEND_TIME(dayId, timeId), {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${props.jwt}`,
+        },
+        credentials: "include",
+      });
+    } catch (error) {
+      let em = "An unknown error occurred";
+      if (error instanceof Error) {
+        em = error.message;
+      }
+      toast({
+        title: "Failed to remove extend time",
+        description: <>{em}</>,
+      });
+    } finally {
+      const updatedAvailability = { ...availability };
+      const updatedDays = updatedAvailability?.days?.map((day) => {
+        if (day.id === dayId && day.extend_times) {
+          const updatedExtendTimes = day.extend_times.filter(
+            (extendTime) => extendTime.id !== timeId,
+          );
           return {
             ...day,
-            extend_times: [...extendTimes, newExtendTime],
+            extend_times: updatedExtendTimes,
           };
         }
         return day;
-      }),
-    };
-    setAvailability(newAvailability)
-  }
-
-  const removeExtendTime = (dayId: string, timeId: string) => {
-    if (!dayId || !timeId || !availability?.days) return;
-    const updatedAvailability = { ...availability };
-    const updatedDays = updatedAvailability?.days?.map(day => {
-      if (day.id === dayId && day.extend_times) {
-        const updatedExtendTimes = day.extend_times
-          .filter(extendTime => extendTime.id !== timeId);
-        return {
-          ...day,
-          extend_times: updatedExtendTimes,
-        };
-      }
-      return day;
-    });
-    updatedAvailability.days = updatedDays;
-    setAvailability(updatedAvailability);
-  }
+      });
+      updatedAvailability.days = updatedDays;
+      props.callback(updatedAvailability);
+      setLoadingStates((prevState) => ({ ...prevState, [timeId]: false }));
+    }
+  };
 
   const onCalendarStateChange = (state: boolean, provider: string) => {
-    console.log(state, provider)
-  }
+    console.log(state, provider);
+  };
+
+  const saveChanges = async (payload: string) => {
+    return await fetch(API_PATH.AVAILABILITY, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${props.jwt}`,
+      },
+      credentials: "include",
+      body: payload,
+    });
+  };
 
   return (
     <>

@@ -54,44 +54,40 @@ export function ProfileCard(props: ProfileCardProps) {
       </div>
       <div className="p-4">
         <div className="flex items-center gap-2 text-xs">
-          {!props?.status?.isMentor
-            ? (<XIcon className="w-4 text-red-500" />)
-            : (<CheckIcon className="w-4 text-green-500" />)
-          }
+          {!props?.status?.isMentor ? (
+            <XIcon className="w-4 text-red-500" />
+          ) : (
+            <CheckIcon className="w-4 text-green-500" />
+          )}
           Mentor
         </div>
         <div className="flex items-center gap-2 text-xs">
-          {!props?.status?.availabilityDataExist
-            ? (<XIcon className="w-4 text-red-500" />)
-            : (<CheckIcon className="w-4 text-green-500" />)
-          }
+          {!props?.status?.availabilityDataExist ? (
+            <XIcon className="w-4 text-red-500" />
+          ) : (
+            <CheckIcon className="w-4 text-green-500" />
+          )}
           Availability
         </div>
         <div className="flex items-center gap-2 text-xs">
-          {!props?.status?.calendarAppIntegration
-            ? (<XIcon className="w-4 text-red-500" />)
-            : (<CheckIcon className="w-4 text-green-500" />)
-          }
+          {!props?.status?.calendarAppIntegration ? (
+            <XIcon className="w-4 text-red-500" />
+          ) : (
+            <CheckIcon className="w-4 text-green-500" />
+          )}
           Calendar App Integration
         </div>
         <div className="flex items-center gap-2 text-xs">
-          {!props?.status?.conferenceAppIntegration
-            ? (<XIcon className="w-4 text-red-500" />)
-            : (<CheckIcon className="w-4 text-green-500" />)
-          }
+          {!props?.status?.conferenceAppIntegration ? (
+            <XIcon className="w-4 text-red-500" />
+          ) : (
+            <CheckIcon className="w-4 text-green-500" />
+          )}
           Conference App Integration
         </div>
       </div>
     </>
   );
 
-  return (
-    <>
-      {
-        props?.loading
-          ? (<ProfileSkeleton />)
-          : (<ProfileSection />)
-      }
-    </>
-  );
+  return <>{props?.loading ? <ProfileSkeleton /> : <ProfileSection />}</>;
 }
