@@ -4,6 +4,7 @@ import {
   Availability,
   handleResponse,
   ProfileStatus,
+  HttpResponse,
 } from "@/lib/user";
 import { useCallback, useEffect, useState } from "react";
 import { PackageOpenIcon } from "lucide-react";
@@ -40,7 +41,7 @@ export function ProfileContainer(props: MentorProfileCardProps) {
         },
         credentials: "include",
       });
-      const profileData = await handleResponse<User>(pr);
+      const profileData = await handleResponse<HttpResponse<User>>(pr);
       const pd = profileData?.data;
       setProfile(pd);
       setProfileStatus((prevStatus) => ({
@@ -62,7 +63,7 @@ export function ProfileContainer(props: MentorProfileCardProps) {
     }
   }, [props.jwt]);
 
-  const updateAvailability = useCallback(async (data: Availability) => {
+  const updateAvailability = useCallback(async (data: Availability | null) => {
     setAvailability(data);
     updateProfileStatus(data);
   }, []);
@@ -77,7 +78,8 @@ export function ProfileContainer(props: MentorProfileCardProps) {
         },
         credentials: "include",
       });
-      const availabilityData = await handleResponse<Availability>(ar);
+      const availabilityData =
+        await handleResponse<HttpResponse<Availability>>(ar);
       const ad = availabilityData?.data;
       updateAvailability(ad);
     } catch (error) {
@@ -95,7 +97,7 @@ export function ProfileContainer(props: MentorProfileCardProps) {
     }
   }, [props.jwt, updateAvailability]);
 
-  const updateProfileStatus = (data: Availability) => {
+  const updateProfileStatus = (data: Availability | null) => {
     setProfileStatus((prevStatus) => ({
       ...prevStatus,
       availabilityDataExist: data != null,

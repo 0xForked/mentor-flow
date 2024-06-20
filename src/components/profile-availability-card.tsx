@@ -3,6 +3,7 @@ import {
   Availability,
   AvailabilityDay,
   ExtendTime,
+  HttpResponse,
   OAuthProvider,
   handleResponse,
 } from "@/lib/user";
@@ -11,7 +12,13 @@ import googleLogo from "../assets/google.webp";
 import microsoftLogo from "../assets/microsoft.png";
 import { Button } from "./ui/button";
 import { Switch } from "./ui/switch";
-import { addOneHour, intToDay, intToTime, timeReference } from "@/lib/time";
+import {
+  addOneHour,
+  intToDay,
+  intToTime,
+  strTimeToInt,
+  timeReference,
+} from "@/lib/time";
 import {
   Select,
   SelectContent,
@@ -29,7 +36,7 @@ import {
   TrashIcon,
 } from "lucide-react";
 import { Badge } from "./ui/badge";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "./ui/use-toast";
 import { capitalizeFirstChar } from "@/lib/utils";
 
@@ -38,7 +45,7 @@ interface AvailabilityProps {
   error?: string | null;
   jwt?: string;
   availability?: Availability | null;
-  callback(availability: Availability): void;
+  callback(availability: Availability | null): void;
 }
 
 interface LoadingStates {
@@ -46,10 +53,7 @@ interface LoadingStates {
 }
 
 export function AvailabilityCard(props: AvailabilityProps) {
-  const [availability, setAvailability] = useState(props.availability);
   const [loadingStates, setLoadingStates] = useState<LoadingStates>({});
-
-  useEffect(() => setAvailability(props.availability), [props]);
 
   const AvailabilitySkeleton = () => (
     <>
@@ -121,7 +125,7 @@ export function AvailabilityCard(props: AvailabilityProps) {
 
   const AvailabilitySection = () => (
     <>
-      <h5 className="text-md font-semibold">{availability?.label}</h5>
+      <h5 className="text-md font-semibold">{props.availability?.label}</h5>
       <section className="mt-2 space-y-1">
         <span className="flex flex-row items-center text-sm font-normal">
           <Clock className="w-4 h-4 inline mr-1" />
@@ -129,11 +133,11 @@ export function AvailabilityCard(props: AvailabilityProps) {
         </span>
         <span className="flex flex-row items-center text-sm font-normal">
           <Globe className="w-4 h-4 inline mr-1" />
-          {availability?.timezone}
+          {props.availability?.timezone}
         </span>
       </section>
       <section className="flex flex-col gap-4 my-6">
-        {availability?.days?.map((day, index) => (
+        {props.availability?.days?.map((day, index) => (
           <div
             className="flex w-full flex-col justify-between gap-4 last:mb-0 xl:flex-row xl:gap-12 xl:px-0"
             key={index}
@@ -156,7 +160,7 @@ export function AvailabilityCard(props: AvailabilityProps) {
                 <div className="flex flex-col gap-2">
                   <div className="flex gap-1 last:mb-0 sm:gap-2">
                     <div className="flex flex-row gap-2 items-center">
-                      <DayRage item={day} itemType="main" />
+                      <DayRage dayId={day.id} item={day} itemType="main" />
                     </div>
                     <Button
                       variant="ghost"
@@ -173,7 +177,7 @@ export function AvailabilityCard(props: AvailabilityProps) {
                   {day?.extend_times?.map((time, index) => (
                     <div className="flex gap-1 last:mb-0 sm:gap-2" key={index}>
                       <div className="flex flex-row gap-2 items-center">
-                        <DayRage item={time} itemType="extend" />
+                        <DayRage dayId={day.id} item={time} itemType="extend" />
                       </div>
                       <Button
                         variant="ghost"
@@ -195,12 +199,12 @@ export function AvailabilityCard(props: AvailabilityProps) {
         ))}
       </section>
       <section className="space-y-4">
-        {!availability?.connected_with_google ? (
+        {!props.availability?.connected_with_google ? (
           <ConnectWith provider={OAuthProvider.GOOGLE} />
         ) : (
           <InstalledApp provider={OAuthProvider.GOOGLE} />
         )}
-        {!availability?.connected_with_microsoft ? (
+        {!props.availability?.connected_with_microsoft ? (
           <ConnectWith provider={OAuthProvider.MICROSOFT} />
         ) : (
           <InstalledApp provider={OAuthProvider.MICROSOFT} />
@@ -210,62 +214,91 @@ export function AvailabilityCard(props: AvailabilityProps) {
   );
 
   const DayRage = (v: {
+    dayId: string;
     item: AvailabilityDay | ExtendTime;
     itemType: string;
   }) => (
     <>
-      <Select
-        disabled={
-          v.itemType != "extend" ? !(v.item as AvailabilityDay).enabled : false
-        }
-        defaultValue={intToTime(v.item.start_time)}
-      >
-        <SelectTrigger className="w-[100px]">
-          <SelectValue placeholder="Start" />
-        </SelectTrigger>
-        <SelectContent>
-          {((v.itemType == "main" && (v.item as AvailabilityDay).enabled) ||
-            v.itemType == "extend") && (
-            <SelectGroup>
-              {timeReference.map((time, index) => (
-                <SelectItem key={index} value={time}>
-                  {time}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          )}
-        </SelectContent>
-      </Select>
+      {loadingStates[`select-${v.item.id}-start_time`] ? (
+        <Skeleton className="h-[40px] w-[100px] bg-gray-200 flex ">
+          <Loader2 className="animate-spin m-auto" />
+        </Skeleton>
+      ) : (
+        <Select
+          disabled={
+            v.itemType != "extend"
+              ? !(v.item as AvailabilityDay).enabled
+              : false
+          }
+          defaultValue={intToTime(v.item.start_time)}
+          onValueChange={(value: string) =>
+            onTimeValueChange(
+              v.item.id,
+              v.dayId,
+              v.itemType,
+              "start_time",
+              value,
+            )
+          }
+        >
+          <SelectTrigger className="w-[100px]">
+            <SelectValue placeholder="Start" />
+          </SelectTrigger>
+          <SelectContent>
+            {((v.itemType == "main" && (v.item as AvailabilityDay).enabled) ||
+              v.itemType == "extend") && (
+              <SelectGroup>
+                {timeReference.map((time, index) => (
+                  <SelectItem key={index} value={time}>
+                    {time}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            )}
+          </SelectContent>
+        </Select>
+      )}
       <span>-</span>
-      <Select
-        disabled={
-          v.itemType != "extend" ? !(v.item as AvailabilityDay).enabled : false
-        }
-        defaultValue={intToTime(v.item.end_time)}
-      >
-        <SelectTrigger className="w-[100px]">
-          <SelectValue placeholder="End" />
-        </SelectTrigger>
-        <SelectContent>
-          {((v.itemType == "main" && (v.item as AvailabilityDay).enabled) ||
-            v.itemType == "extend") && (
-            <SelectGroup>
-              {timeReference.map((time, index) => (
-                <SelectItem key={index} value={time}>
-                  {time}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          )}
-        </SelectContent>
-      </Select>
+      {loadingStates[`select-${v.item.id}-end_time`] ? (
+        <Skeleton className="h-[40px] w-[100px] bg-gray-200 flex ">
+          <Loader2 className="animate-spin m-auto" />
+        </Skeleton>
+      ) : (
+        <Select
+          disabled={
+            v.itemType != "extend"
+              ? !(v.item as AvailabilityDay).enabled
+              : false
+          }
+          defaultValue={intToTime(v.item.end_time)}
+          onValueChange={(value: string) =>
+            onTimeValueChange(v.item.id, v.dayId, v.itemType, "end_time", value)
+          }
+        >
+          <SelectTrigger className="w-[100px]">
+            <SelectValue placeholder="End" />
+          </SelectTrigger>
+          <SelectContent>
+            {((v.itemType == "main" && (v.item as AvailabilityDay).enabled) ||
+              v.itemType == "extend") && (
+              <SelectGroup>
+                {timeReference.map((time, index) => (
+                  <SelectItem key={index} value={time}>
+                    {time}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            )}
+          </SelectContent>
+        </Select>
+      )}
     </>
   );
 
   const InstalledApp = (v: { provider: OAuthProvider }) => (
     <>
       <section className="bg-gray-100 relative rounded-md divide-y divide-dashed">
-        {availability?.installed_apps?.calendars
+        {props.availability?.installed_apps?.calendars
           ?.filter((item) => item.provider === v.provider)
           .map((item, index) => (
             <div className="flex flex-row gap-4 p-4" key={index}>
@@ -298,7 +331,7 @@ export function AvailabilityCard(props: AvailabilityProps) {
               </div>
             </div>
           ))}
-        {availability?.installed_apps?.conferencing
+        {props.availability?.installed_apps?.conferencing
           ?.filter((item) => item.provider === v.provider)
           .map((item, index) => (
             <div className="flex flex-row gap-4 p-4" key={index}>
@@ -468,7 +501,7 @@ export function AvailabilityCard(props: AvailabilityProps) {
           ],
         }),
       );
-      const resp = await handleResponse<Availability>(req);
+      const resp = await handleResponse<HttpResponse<Availability>>(req);
       const availabilityData = resp?.data;
       props.callback(availabilityData);
     } catch (error) {
@@ -484,6 +517,125 @@ export function AvailabilityCard(props: AvailabilityProps) {
       setLoadingStates((prevState) => ({
         ...prevState,
         [`switch-${day.id}`]: false,
+      }));
+    }
+  };
+
+  const onTimeValueChange = async (
+    itemId: string,
+    dayId: string,
+    itemType: string,
+    key: string,
+    val: string,
+  ) => {
+    if (!itemId && !val && !props.availability) return;
+
+    try {
+      setLoadingStates((prevState) => ({
+        ...prevState,
+        [`select-${itemId}-${key}`]: true,
+      }));
+
+      const availabilityDay = props.availability?.days?.find(
+        (day) => day.id === dayId,
+      );
+      if (!availabilityDay) {
+        throw new Error("Availability day not found");
+      }
+
+      if (itemType == "main") {
+        if (key === "start_time") {
+          availabilityDay.start_time = strTimeToInt(val);
+          // Apply if start_time > end_time, adjust end_time
+          if (availabilityDay.start_time >= availabilityDay.end_time) {
+            setLoadingStates((prevState) => ({
+              ...prevState,
+              [`select-${itemId}-end_time`]: true,
+            }));
+            availabilityDay.end_time = addOneHour(availabilityDay.start_time);
+            toast({
+              title: "Adjusted End Time",
+              description: <>End time was adjusted due to start time change.</>,
+            });
+          }
+        } else if (key === "end_time") {
+          const timeValue = strTimeToInt(val);
+          // Validate: if end_time <= start_time, throw error
+          if (timeValue <= availabilityDay.start_time) {
+            throw Error(
+              "Invalid end time: End time cannot be earlier than or equal with start time.",
+            );
+          }
+          availabilityDay.end_time = timeValue;
+        }
+      }
+
+      if (itemType == "extend") {
+        const extendTime = availabilityDay.extend_times?.find(
+          (time) => time.id === itemId,
+        );
+        if (!extendTime) {
+          throw new Error("Extend time not found");
+        }
+        if (key === "start_time") {
+          extendTime.start_time = strTimeToInt(val);
+          // Apply  if start_time >= end_time, adjust end_time
+          if (extendTime.start_time >= extendTime.end_time) {
+            setLoadingStates((prevState) => ({
+              ...prevState,
+              [`select-${itemId}-end_time`]: true,
+            }));
+            extendTime.end_time = addOneHour(extendTime.start_time);
+            toast({
+              title: "Adjusted End Time",
+              description: <>End time was adjusted due to start time change.</>,
+            });
+          }
+        } else if (key === "end_time") {
+          const timeValue = strTimeToInt(val);
+          // Validate: if end_time <= start_time, throw error
+          if (timeValue <= extendTime.start_time) {
+            throw Error(
+              "Invalid end time: End time cannot be earlier than or equal with start time.",
+            );
+          }
+          extendTime.end_time = timeValue;
+        }
+      }
+
+      const req = await saveChanges(
+        JSON.stringify({
+          days: [
+            {
+              id: availabilityDay.id,
+              enabled: availabilityDay.enabled,
+              start_time: availabilityDay.start_time,
+              end_time: availabilityDay.end_time,
+              extend_times: availabilityDay.extend_times,
+            },
+          ],
+        }),
+      );
+      const resp = await handleResponse<HttpResponse<Availability>>(req);
+      const availabilityData = resp?.data;
+      props.callback(availabilityData);
+    } catch (error) {
+      let em = "An unknown error occurred";
+      if (error instanceof Error) {
+        em = error.message;
+      }
+      toast({
+        title: "Failed to update data",
+        description: <>{em}</>,
+      });
+    } finally {
+      setLoadingStates((prevState) => ({
+        ...prevState,
+        [`select-${itemId}-${key}`]: false,
+      }));
+      setLoadingStates((prevState) => ({
+        ...prevState,
+        [`select-${itemId}-end_time`]: false,
       }));
     }
   };
@@ -517,7 +669,7 @@ export function AvailabilityCard(props: AvailabilityProps) {
           ],
         }),
       );
-      const resp = await handleResponse<Availability>(req);
+      const resp = await handleResponse<HttpResponse<Availability>>(req);
       const availabilityData = resp?.data;
       props.callback(availabilityData);
     } catch (error) {
@@ -535,7 +687,7 @@ export function AvailabilityCard(props: AvailabilityProps) {
   };
 
   const removeExtendTime = async (dayId: string, timeId: string) => {
-    if (!dayId || !timeId || !availability?.days) return;
+    if (!dayId || !timeId || !props.availability?.days) return;
     try {
       setLoadingStates((prevState) => ({ ...prevState, [timeId]: true }));
       await fetch(API_PATH.AVAILABILITY_EXTEND_TIME(dayId, timeId), {
@@ -556,7 +708,7 @@ export function AvailabilityCard(props: AvailabilityProps) {
         description: <>{em}</>,
       });
     } finally {
-      const updatedAvailability = { ...availability };
+      const updatedAvailability = { ...props.availability };
       const updatedDays = updatedAvailability?.days?.map((day) => {
         if (day.id === dayId && day.extend_times) {
           const updatedExtendTimes = day.extend_times.filter(
@@ -593,7 +745,7 @@ export function AvailabilityCard(props: AvailabilityProps) {
 
   return (
     <>
-      {props?.loading && !availability ? (
+      {props?.loading && !props.availability ? (
         <AvailabilitySkeleton />
       ) : (
         <AvailabilitySection />

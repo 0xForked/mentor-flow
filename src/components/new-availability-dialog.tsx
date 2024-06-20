@@ -29,13 +29,18 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Loader2 } from "lucide-react";
-import { API_PATH, Availability, handleResponse } from "@/lib/user";
+import {
+  API_PATH,
+  Availability,
+  HttpResponse,
+  handleResponse,
+} from "@/lib/user";
 import { useState } from "react";
 import { toast } from "./ui/use-toast";
 
 interface NewAvailabilityDialogProps {
   jwt?: string;
-  callback(availability: Availability): void;
+  callback(availability: Availability | null): void;
 }
 
 const AvailabilityFormSchema = z.object({
@@ -70,7 +75,8 @@ export function NewAvailabilityDialog(props: NewAvailabilityDialogProps) {
           timezone: data.timezone,
         }),
       });
-      const availabilityData = await handleResponse<Availability>(ar);
+      const availabilityData =
+        await handleResponse<HttpResponse<Availability>>(ar);
       props?.callback(availabilityData?.data);
     } catch (error) {
       let em = "An unknown error occurred";

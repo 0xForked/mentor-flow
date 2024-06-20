@@ -176,7 +176,7 @@ export const intToTime = (timeInt: number): string => {
   return `${formattedHour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}${period}`;
 };
 
-export function addOneHour(time: number): number {
+export const addOneHour = (time: number): number => {
   const hours = Math.floor(time / 100);
   const minutes = time % 100;
   let newHours = hours + 1;
@@ -186,4 +186,17 @@ export function addOneHour(time: number): number {
   }
   const newTime = newHours * 100 + newMinutes;
   return newTime;
-}
+};
+
+export const strTimeToInt = (timeStr: string): number => {
+  const cleanTimeString = timeStr.replace(/(am|pm)/i, "").trim();
+  const [hours, minutes] = cleanTimeString.split(":").map(Number);
+  let convertedHours = hours;
+  if (timeStr.toLowerCase().includes("pm") && hours !== 12) {
+    convertedHours = hours + 12;
+  } else if (timeStr.toLowerCase().includes("am") && hours === 12) {
+    convertedHours = 0; // Midnight case
+  }
+  const timeInt = convertedHours * 100 + minutes;
+  return timeInt;
+};

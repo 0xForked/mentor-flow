@@ -67,6 +67,10 @@ export const API_PATH = {
     `${API_URL}/v1/mentor-settings/oauth/${provider}/connect`,
 };
 
+export interface HttpResponse<T> {
+  data: T | null;
+}
+
 export const handleResponse = async <T>(response: Response): Promise<T> => {
   if (!response.ok) {
     let errorMessage: string;

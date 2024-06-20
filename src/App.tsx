@@ -34,7 +34,7 @@ function App() {
   function removeExpiredItems() {
     const now = new Date().getTime();
     for (const key in localStorage) {
-      if (localStorage.hasOwnProperty(key)) {
+      if (Object.prototype.hasOwnProperty.call(localStorage, key)) {
         const itemStr = localStorage.getItem(key);
         if (itemStr) {
           const item = JSON.parse(itemStr);
