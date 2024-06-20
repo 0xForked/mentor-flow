@@ -58,7 +58,7 @@ function App() {
   }, []);
 
   const onJWTUpdated = (jwt: string) => {
-    setItemWithExpiry(jwtCacheKey, jwt, 5 * 60 * 1000);
+    setItemWithExpiry(jwtCacheKey, jwt, 30 * 60 * 1000); // 30m
     setJWT(jwt);
   };
 

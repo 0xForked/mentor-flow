@@ -11,14 +11,21 @@ export interface Availability {
   timezone: string;
   connected_with_google: boolean;
   connected_with_microsoft: boolean;
-  days?: AvailabilityDays[] | null;
+  days?: AvailabilityDay[] | null;
   installed_apps?: InstalledApp | null;
 }
 
-export interface AvailabilityDays {
+export interface AvailabilityDay {
   id: string;
   enabled: boolean;
   day: number;
+  start_time: number;
+  end_time: number;
+  extend_times?: ExtendTime[] | null
+}
+
+export interface ExtendTime {
+  id: string;
   start_time: number;
   end_time: number;
 }

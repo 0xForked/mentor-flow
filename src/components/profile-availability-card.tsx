@@ -1,10 +1,10 @@
-import { API_PATH, Availability, OAuthProvider } from "@/lib/user";
+import { API_PATH, Availability, AvailabilityDay, ExtendTime, OAuthProvider } from "@/lib/user";
 import { Skeleton } from "./ui/skeleton";
 import googleLogo from "../assets/google.webp";
 import microsoftLogo from "../assets/microsoft.png";
 import { Button } from "./ui/button";
 import { Switch } from "./ui/switch";
-import { intToDay, intToTime, timeReference } from "@/lib/time";
+import { addOneHour, intToDay, intToTime, timeReference } from "@/lib/time";
 import {
   Select,
   SelectContent,
@@ -13,11 +13,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { ArrowLeftIcon, Clock, Globe, Loader2 } from "lucide-react";
+import { ArrowLeftIcon, Clock, Globe, Loader2, PlusIcon, TrashIcon } from "lucide-react";
 import { Badge } from "./ui/badge";
-import { useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { toast } from "./ui/use-toast";
-import { capitalizeFirstChar } from "@/lib/utils";
+import { capitalizeFirstChar, generateId } from "@/lib/utils";
 
 interface AvailabilityProps {
   loading: boolean;
@@ -27,7 +27,10 @@ interface AvailabilityProps {
 }
 
 export function AvailabilityCard(props: AvailabilityProps) {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState({ google: false, microsoft: false });
+  const [availability, setAvailability] = useState(props.availability)
+
+  useEffect(() => setAvailability(props.availability), [props])
 
   const AvailabilitySkeleton = () => (
     <>
@@ -99,7 +102,7 @@ export function AvailabilityCard(props: AvailabilityProps) {
 
   const AvailabilitySection = () => (
     <>
-      <h5 className="text-md font-semibold">{props?.availability?.label}</h5>
+      <h5 className="text-md font-semibold">{availability?.label}</h5>
       <section className="mt-2 space-y-1">
         <span className="flex flex-row items-center text-sm font-normal">
           <Clock className="w-4 h-4 inline mr-1" />
@@ -107,74 +110,56 @@ export function AvailabilityCard(props: AvailabilityProps) {
         </span>
         <span className="flex flex-row items-center text-sm font-normal">
           <Globe className="w-4 h-4 inline mr-1" />
-          {props?.availability?.timezone}
+          {availability?.timezone}
         </span>
       </section>
-      <section className="flex flex-col my-4 gap-2">
-        {props?.availability?.days?.map((item, index) => (
+      <section className="flex flex-col gap-4 my-6">
+        {availability?.days?.map((day, index) => (
           <div
-            className="flex flex-row justify-between items-center"
+            className="flex w-full flex-col justify-between gap-4 last:mb-0 xl:flex-row xl:gap-12 xl:px-0"
             key={index}
           >
-            <div className="flex flex-row gap-4 items-center">
+            <div className="flex h-[36px] items-center gap-4 md:w-32">
               <Switch
-                checked={item.enabled}
-                onCheckedChange={() => item.enabled != item.enabled}
+                onCheckedChange={(checked: boolean) => onDayStateChange(checked, day.id)}
+                defaultChecked={day.enabled}
               />
-              <span>{intToDay(item.day)}</span>
+              <span>{intToDay(day.day)}</span>
             </div>
-            <div className="flex flex-row gap-2 items-center">
-              <Select
-                disabled={!item.enabled}
-                defaultValue={item.enabled ? intToTime(900) : ""}
-              >
-                <SelectTrigger className="w-[100px]">
-                  <SelectValue placeholder="Start" />
-                </SelectTrigger>
-                <SelectContent>
-                  {item.enabled && (
-                    <SelectGroup>
-                      {timeReference.map((time, index) => (
-                        <SelectItem key={index} value={time}>
-                          {time}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  )}
-                </SelectContent>
-              </Select>
-              <span>-</span>
-              <Select
-                disabled={!item.enabled}
-                defaultValue={item.enabled ? intToTime(1600) : ""}
-              >
-                <SelectTrigger className="w-[100px]">
-                  <SelectValue placeholder="End" />
-                </SelectTrigger>
-                <SelectContent>
-                  {item.enabled && (
-                    <SelectGroup>
-                      {timeReference.map((time, index) => (
-                        <SelectItem key={index} value={time}>
-                          {time}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  )}
-                </SelectContent>
-              </Select>
+            <div className="flex sm:gap-2">
+              {day.enabled &&
+                <div className="flex flex-col gap-2">
+                  <div className="flex gap-1 last:mb-0 sm:gap-2">
+                    <div className="flex flex-row gap-2 items-center">
+                      <DayRage item={day} itemType="main" />
+                    </div>
+                    <Button variant="ghost" onClick={() => addNewExtendTime(day.id)}>
+                      <PlusIcon className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  {day?.extend_times?.map((time, index) => (
+                    <div className="flex gap-1 last:mb-0 sm:gap-2" key={index}>
+                      <div className="flex flex-row gap-2 items-center">
+                        <DayRage item={time} itemType="extend" />
+                      </div>
+                      <Button variant="ghost" onClick={() => removeExtendTime(day.id, time.id)}>
+                        <TrashIcon className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>}
             </div>
           </div>
         ))}
       </section>
       <section className="space-y-4">
         {
-          !props?.availability?.connected_with_google
+          !availability?.connected_with_google
             ? (<ConnectWith provider={OAuthProvider.GOOGLE} />)
             : (<InstalledApp provider={OAuthProvider.GOOGLE} />)
         }
         {
-          !props?.availability?.connected_with_microsoft
+          !availability?.connected_with_microsoft
             ? (<ConnectWith provider={OAuthProvider.MICROSOFT} />)
             : (<InstalledApp provider={OAuthProvider.MICROSOFT} />)
         }
@@ -182,10 +167,54 @@ export function AvailabilityCard(props: AvailabilityProps) {
     </>
   );
 
+  const DayRage = (v: { item: AvailabilityDay | ExtendTime, itemType: string }) => (
+    <>
+      <Select
+        disabled={v.itemType != "extend" ? !(v.item as AvailabilityDay).enabled : false}
+        defaultValue={intToTime(v.item.start_time)}
+      >
+        <SelectTrigger className="w-[100px]">
+          <SelectValue placeholder="Start" />
+        </SelectTrigger>
+        <SelectContent>
+          {((v.itemType == "main" && (v.item as AvailabilityDay).enabled) || v.itemType == "extend") && (
+            <SelectGroup>
+              {timeReference.map((time, index) => (
+                <SelectItem key={index} value={time}>
+                  {time}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          )}
+        </SelectContent>
+      </Select>
+      <span>-</span>
+      <Select
+        disabled={v.itemType != "extend" ? !(v.item as AvailabilityDay).enabled : false}
+        defaultValue={intToTime(v.item.end_time)}
+      >
+        <SelectTrigger className="w-[100px]">
+          <SelectValue placeholder="End" />
+        </SelectTrigger>
+        <SelectContent>
+          {((v.itemType == "main" && (v.item as AvailabilityDay).enabled) || v.itemType == "extend") && (
+            <SelectGroup>
+              {timeReference.map((time, index) => (
+                <SelectItem key={index} value={time}>
+                  {time}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          )}
+        </SelectContent>
+      </Select>
+    </>
+  )
+
   const InstalledApp = (v: { provider: OAuthProvider }) => (
     <>
       <section className="bg-gray-100 relative rounded-md divide-y divide-dashed">
-        {props?.availability?.installed_apps?.calendars
+        {availability?.installed_apps?.calendars
           ?.filter((item) => item.provider === v.provider)
           .map((item, index) => (
             <div className="flex flex-row gap-4 p-4" key={index}>
@@ -201,17 +230,20 @@ export function AvailabilityCard(props: AvailabilityProps) {
                   prevent double bookings
                 </p>
                 <div className="flex flex-row items-center gap-2 mt-4">
-                  <Switch checked={true} />
-                  <span>{item.email} (Calendar)</span>
+                  <Switch
+                    defaultChecked={true}
+                    onCheckedChange={(checked: boolean) => onCalendarStateChange(checked, v.provider)}
+                  />
+                  <span className="text-xs">{item.email} (Calendar)</span>
                   {item.is_default && <Badge className="bg-gray-200 text-black hover:bg-gray-200 hover:text-black py-1 rounded-sm">
                     <ArrowLeftIcon className="h-4 w-4 mr-2" />
-                    <span className="text-xs">Adding events to</span>
+                    Adding events to
                   </Badge>}
                 </div>
               </div>
             </div>
           ))}
-        {props?.availability?.installed_apps?.conferencing
+        {availability?.installed_apps?.conferencing
           ?.filter((item) => item.provider === v.provider)
           .map((item, index) => (
             <div className="flex flex-row gap-4 p-4" key={index}>
@@ -242,28 +274,41 @@ export function AvailabilityCard(props: AvailabilityProps) {
       <div className="relative">
         <div className="bg-gray-600 w-full h-full absolute top-0 left-0 opacity-40 rounded-md z-10"></div>
         <div className="bg-gray-700 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 px-12 py-4 rounded-md z-20 bg-opacity-60">
-          <Button
-            className="font-normal w-56"
-            disabled={loading}
-            onClick={() => issueNewOAuthURL(v.provider)}
-          >
-            {loading ? (
-              <Loader2 className="w-4 animate-spin mr-1" />
-            ) : (
-              <img
-                className={
-                  v.provider == OAuthProvider.GOOGLE
-                    ? "w-6 h-6 mr-2" : "w-[20px] h-[20px] mr-2"
-                }
-                src={
-                  v.provider == OAuthProvider.GOOGLE
-                    ? googleLogo : microsoftLogo
-                }
-                alt={v.provider + "-logo"}
-              />
-            )}
-            Connect with {capitalizeFirstChar(v.provider)}
-          </Button>
+          {v.provider == OAuthProvider.GOOGLE ? (
+            <Button
+              className="font-normal w-56"
+              disabled={loading.google}
+              onClick={() => issueNewOAuthURL(v.provider)}
+            >
+              {loading.google ? (
+                <Loader2 className="w-4 animate-spin mr-1" />
+              ) : (
+                <img
+                  className="w-6 h-6 mr-2"
+                  src={googleLogo}
+                  alt={v.provider + "-logo"}
+                />
+              )}
+              Connect with {capitalizeFirstChar(v.provider)}
+            </Button>
+          ) : (
+            <Button
+              className="font-normal w-56"
+              disabled={loading.microsoft}
+              onClick={() => issueNewOAuthURL(v.provider)}
+            >
+              {loading.microsoft ? (
+                <Loader2 className="w-4 animate-spin mr-1" />
+              ) : (
+                <img
+                  className="w-[20px] h-[20px] mr-2"
+                  src={microsoftLogo}
+                  alt={v.provider + "-logo"}
+                />
+              )}
+              Connect with {capitalizeFirstChar(v.provider)}
+            </Button>
+          )}
         </div>
         <section className="bg-gray-100 relative rounded-md divide-y divide-dashed">
           <div className="flex flex-row gap-4 p-4">
@@ -337,7 +382,10 @@ export function AvailabilityCard(props: AvailabilityProps) {
   const issueNewOAuthURL = async (provider: OAuthProvider) => {
     if (!provider) return;
     try {
-      setLoading(true);
+      setLoading({
+        google: provider == OAuthProvider.GOOGLE,
+        microsoft: provider == OAuthProvider.MICROSOFT
+      });
       const resp = await fetch(API_PATH.OAUTH_WEB_CONNECT(provider), {
         method: "POST",
         headers: {
@@ -358,13 +406,80 @@ export function AvailabilityCard(props: AvailabilityProps) {
         description: <>{em}</>,
       });
     } finally {
-      setLoading(false);
+      setLoading({
+        google: false,
+        microsoft: false
+      });
     }
   };
 
+  const onDayStateChange = (state: boolean, id: string) => {
+    if (!availability || !id) return;
+    const newAvailability = {
+      ...availability,
+      days: availability.days?.map(item => {
+        if (item.id === id) {
+          return { ...item, enabled: state };
+        }
+        return item;
+      })
+    };
+    setAvailability(newAvailability)
+  }
+
+  const addNewExtendTime = (id: string) => {
+    if (!availability || !id) return;
+    const newAvailability = {
+      ...availability,
+      days: availability.days?.map(day => {
+        if (day.id === id) {
+          const extendTimes = day.extend_times || [];
+          const newExtendTime: ExtendTime = {
+            id: generateId(),
+            start_time: day.end_time,
+            end_time: addOneHour(day.end_time),
+          };
+          if (extendTimes.length > 0) {
+            const lastExtendTime = extendTimes[extendTimes.length - 1];
+            newExtendTime.start_time = lastExtendTime.end_time;
+            newExtendTime.end_time = addOneHour(lastExtendTime.end_time);
+          }
+          return {
+            ...day,
+            extend_times: [...extendTimes, newExtendTime],
+          };
+        }
+        return day;
+      }),
+    };
+    setAvailability(newAvailability)
+  }
+
+  const removeExtendTime = (dayId: string, timeId: string) => {
+    if (!dayId || !timeId || !availability?.days) return;
+    const updatedAvailability = { ...availability };
+    const updatedDays = updatedAvailability?.days?.map(day => {
+      if (day.id === dayId && day.extend_times) {
+        const updatedExtendTimes = day.extend_times
+          .filter(extendTime => extendTime.id !== timeId);
+        return {
+          ...day,
+          extend_times: updatedExtendTimes,
+        };
+      }
+      return day;
+    });
+    updatedAvailability.days = updatedDays;
+    setAvailability(updatedAvailability);
+  }
+
+  const onCalendarStateChange = (state: boolean, provider: string) => {
+    console.log(state, provider)
+  }
+
   return (
     <>
-      {props?.loading && !props?.availability ? (
+      {props?.loading && !availability ? (
         <AvailabilitySkeleton />
       ) : (
         <AvailabilitySection />

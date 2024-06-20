@@ -175,3 +175,15 @@ export const intToTime = (timeInt: number): string => {
   const formattedHour = hour % 12 || 12;
   return `${formattedHour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}${period}`;
 };
+
+export function addOneHour(time: number): number {
+  const hours = Math.floor(time / 100);
+  const minutes = time % 100;
+  let newHours = hours + 1;
+  const newMinutes = minutes;
+  if (newHours >= 24) {
+    newHours -= 24;
+  }
+  const newTime = newHours * 100 + newMinutes;
+  return newTime;
+}
