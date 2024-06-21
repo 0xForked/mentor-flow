@@ -1,5 +1,3 @@
-"use client";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -42,7 +40,7 @@ export function JWTForm(props: JWTFormProps) {
     toast({
       title: "You submitted the following jwt values:",
       description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
+        <pre className="mt-2 max-w-full w-[340px] rounded-md bg-slate-950 p-4 whitespace-pre-wrap">
           <code className="text-white">{JSON.stringify(data, null, 2)}</code>
         </pre>
       ),

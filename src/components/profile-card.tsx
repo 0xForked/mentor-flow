@@ -1,60 +1,25 @@
-import { Skeleton } from "./ui/skeleton";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { CheckIcon, XIcon } from "lucide-react";
-import { ProfileStatus, User } from "@/lib/user";
+import { useUserStore } from "@/states/userStore";
+import { ProfileSkeleton } from "./skeletons/profile";
 
-interface ProfileCardProps {
-  loading: boolean;
-  error?: string | null;
-  profile: User | null;
-  status: ProfileStatus;
-}
+export function ProfileCard() {
+  const { profile, profileStatus } = useUserStore();
 
-export function ProfileCard(props: ProfileCardProps) {
-  const ProfileSkeleton = () => (
-    <>
-      <div className="flex flex-row gap-2 items-center rounded-xl bg-gray-100 p-4">
-        <Skeleton className="h-10 w-10 rounded-full" />
-        <div className="space-y-2">
-          <Skeleton className="h-4 w-[60px]" />
-          <Skeleton className="h-4 w-[110px]" />
-        </div>
-      </div>
-      <div className="p-4 space-y-2">
-        <div className="flex items-center gap-2 text-xs">
-          <Skeleton className="h-4 w-[15px]" />
-          <Skeleton className="h-4 w-[40px]" />
-        </div>
-        <div className="flex items-center gap-2 text-xs">
-          <Skeleton className="h-4 w-[15px]" />
-          <Skeleton className="h-4 w-[60px]" />
-        </div>
-        <div className="flex items-center gap-2 text-xs">
-          <Skeleton className="h-4 w-[15px]" />
-          <Skeleton className="h-4 w-[110px]" />
-        </div>
-        <div className="flex items-center gap-2 text-xs">
-          <Skeleton className="h-4 w-[15px]" />
-          <Skeleton className="h-4 w-[100px]" />
-        </div>
-      </div>
-    </>
-  );
-
-  const ProfileSection = () => (
+  return <>{!profile ? <ProfileSkeleton /> : (
     <>
       <div className="flex flex-row gap-2 items-center rounded-xl bg-gray-100 p-4">
         <Avatar>
           <AvatarFallback>ME</AvatarFallback>
         </Avatar>
         <section>
-          <h5 className="text-smfont-semibold">{props?.profile?.nick_name}</h5>
-          <p className="text-xs font-medium">{props?.profile?.email}</p>
+          <h5 className="text-smfont-semibold">{profile?.nick_name}</h5>
+          <p className="text-xs font-medium">{profile?.email}</p>
         </section>
       </div>
       <div className="p-4">
         <div className="flex items-center gap-2 text-xs">
-          {!props?.status?.isMentor ? (
+          {!profileStatus?.isMentor ? (
             <XIcon className="w-4 text-red-500" />
           ) : (
             <CheckIcon className="w-4 text-green-500" />
@@ -62,7 +27,7 @@ export function ProfileCard(props: ProfileCardProps) {
           Mentor
         </div>
         <div className="flex items-center gap-2 text-xs">
-          {!props?.status?.availabilityDataExist ? (
+          {!profileStatus?.availabilityDataExist ? (
             <XIcon className="w-4 text-red-500" />
           ) : (
             <CheckIcon className="w-4 text-green-500" />
@@ -70,7 +35,7 @@ export function ProfileCard(props: ProfileCardProps) {
           Availability
         </div>
         <div className="flex items-center gap-2 text-xs">
-          {!props?.status?.calendarAppIntegration ? (
+          {!profileStatus?.calendarAppIntegration ? (
             <XIcon className="w-4 text-red-500" />
           ) : (
             <CheckIcon className="w-4 text-green-500" />
@@ -78,7 +43,7 @@ export function ProfileCard(props: ProfileCardProps) {
           Calendar App Integration
         </div>
         <div className="flex items-center gap-2 text-xs">
-          {!props?.status?.conferenceAppIntegration ? (
+          {!profileStatus?.conferenceAppIntegration ? (
             <XIcon className="w-4 text-red-500" />
           ) : (
             <CheckIcon className="w-4 text-green-500" />
@@ -87,7 +52,5 @@ export function ProfileCard(props: ProfileCardProps) {
         </div>
       </div>
     </>
-  );
-
-  return <>{props?.loading ? <ProfileSkeleton /> : <ProfileSection />}</>;
+  )}</>;
 }

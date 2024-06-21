@@ -1,64 +1,29 @@
 import reactLogo from "./assets/react.svg";
-import "./App.css";
 import { JWTForm } from "./components/jwt-form";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { ProfileContainer } from "./components/profile-container";
+import { useLocalStorage } from "./hooks/useLocalStorage";
+import { useJWTStore } from "./states/jwtStore";
 
 function App() {
-  const jwtCacheKey = "user_token";
-  const [jwt, setJWT] = useState("");
-
-  function setItemWithExpiry(key: string, value: string, ttl: number) {
-    const now = new Date();
-    const item = {
-      value: value,
-      expiry: now.getTime() + ttl,
-    };
-    localStorage.setItem(key, JSON.stringify(item));
-  }
-
-  function getItemWithExpiry(key: string) {
-    const itemStr = localStorage.getItem(key);
-    if (!itemStr) {
-      return null;
-    }
-    const item = JSON.parse(itemStr);
-    const now = new Date();
-    if (now.getTime() > item.expiry) {
-      localStorage.removeItem(key);
-      return null;
-    }
-    return item.value;
-  }
-
-  function removeExpiredItems() {
-    const now = new Date().getTime();
-    for (const key in localStorage) {
-      if (Object.prototype.hasOwnProperty.call(localStorage, key)) {
-        const itemStr = localStorage.getItem(key);
-        if (itemStr) {
-          const item = JSON.parse(itemStr);
-          if (item.expiry && now > item.expiry) {
-            localStorage.removeItem(key);
-          }
-        }
-      }
-    }
-  }
+  const { setCache, getCache, clearExpiredCache } = useLocalStorage();
+  const { jwtKey, jwtValue, setJWT, clearJWT } = useJWTStore();
 
   useEffect(() => {
-    const jwt = getItemWithExpiry(jwtCacheKey);
+    const jwt = getCache(jwtKey);
     if (jwt) {
       setJWT(jwt);
     }
+    const intervalTime = 30 * 1000 // 30s
     const interval = setInterval(() => {
-      removeExpiredItems();
-    }, 30000); // 30s
+      clearExpiredCache(clearJWT);
+    }, intervalTime);
     return () => clearInterval(interval);
-  }, []);
+  }, [getCache, clearExpiredCache, jwtKey, setJWT, clearJWT]);
 
   const onJWTUpdated = (jwt: string) => {
-    setItemWithExpiry(jwtCacheKey, jwt, 30 * 60 * 1000); // 30m
+    const cacheTime = 30 * 60 * 1000 // 30m
+    setCache(jwtKey, jwt, cacheTime);
     setJWT(jwt);
   };
 
@@ -71,10 +36,10 @@ function App() {
       </div>
 
       <div className="flex w-1/2 justify-center mx-auto mb-32">
-        {!jwt ? (
+        {!jwtValue ? (
           <JWTForm callback={onJWTUpdated} />
         ) : (
-          <ProfileContainer jwt={jwt} />
+          <ProfileContainer />
         )}
       </div>
     </>

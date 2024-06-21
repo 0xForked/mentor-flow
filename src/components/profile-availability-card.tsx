@@ -1,24 +1,28 @@
 import {
-  API_PATH,
   Availability,
   AvailabilityDay,
   ExtendTime,
+} from "@/lib/user";
+import {
+  API_PATH,
+  handleResponse,
   HttpResponse,
   OAuthProvider,
-  handleResponse,
-} from "@/lib/user";
-import { Skeleton } from "./ui/skeleton";
-import googleLogo from "../assets/google.webp";
-import microsoftLogo from "../assets/microsoft.png";
-import { Button } from "./ui/button";
-import { Switch } from "./ui/switch";
+} from "@/lib/http";
 import {
   addOneHour,
   intToDay,
   intToTime,
   strTimeToInt,
-  timeReference,
 } from "@/lib/time";
+import {
+  timeReference,
+} from "@/lib/reference";
+import { Skeleton } from "./ui/skeleton";
+import googleLogo from "../assets/google.webp";
+import microsoftLogo from "../assets/microsoft.png";
+import { Button } from "./ui/button";
+import { Switch } from "./ui/switch";
 import {
   Select,
   SelectContent,
@@ -39,93 +43,22 @@ import { Badge } from "./ui/badge";
 import { useState } from "react";
 import { toast } from "./ui/use-toast";
 import { capitalizeFirstChar } from "@/lib/utils";
-
-interface AvailabilityProps {
-  loading: boolean;
-  error?: string | null;
-  jwt?: string;
-  availability?: Availability | null;
-  callback(availability: Availability | null): void;
-}
+import { useJWTStore } from "@/states/jwtStore";
+import { useUserStore } from "@/states/userStore";
+import { AvailabilitySkeleton } from "./skeletons/availability";
 
 interface LoadingStates {
   [key: string]: boolean;
 }
 
-export function AvailabilityCard(props: AvailabilityProps) {
+export function AvailabilityCard() {
+  const { jwtValue } = useJWTStore();
+  const { availability, setUserAvailability } = useUserStore();
   const [loadingStates, setLoadingStates] = useState<LoadingStates>({});
-
-  const AvailabilitySkeleton = () => (
-    <>
-      <Skeleton className="h-8 w-[120px]" />
-      <section className="space-y-2 mt-4">
-        <span className="flex flex-row items-center text-sm font-normal">
-          <Skeleton className="h-4 w-4 mr-2" />
-          <Skeleton className="h-4 w-[160px]" />
-        </span>
-        <span className="flex flex-row items-center text-sm font-normal">
-          <Skeleton className="h-4 w-4 mr-2" />
-          <Skeleton className="h-4 w-[100px]" />
-        </span>
-      </section>
-      <section className="flex flex-col my-6 gap-4">
-        {[0, 1, 2, 3, 4, 5, 6].map((item) => (
-          <div
-            className="flex flex-row justify-between items-center"
-            key={item}
-          >
-            <div className="flex flex-row gap-2 items-center">
-              <Skeleton className="h-8 w-12 rounded-xl" />
-              <Skeleton className="h-4 w-28" />
-            </div>
-            <div className="flex flex-row gap-2 items-center">
-              <Skeleton className="h-10 w-24" />
-              <span>-</span>
-              <Skeleton className="h-10 w-24" />
-            </div>
-          </div>
-        ))}
-      </section>
-      <section className="space-y-4">
-        <section className="bg-gray-100 relative rounded-md divide-y divide-dashed">
-          <div className="flex flex-row gap-4 p-4">
-            <Skeleton className="h-10 w-10" />
-            <div className="relative overflow-auto">
-              <Skeleton className="h-4 w-52" />
-              <Skeleton className="h-4 w-80 mt-2" />
-            </div>
-          </div>
-          <div className="flex flex-row gap-4 p-4">
-            <Skeleton className="h-10 w-10" />
-            <div className="relative overflow-auto">
-              <Skeleton className="h-4 w-52" />
-              <Skeleton className="h-4 w-80 mt-2" />
-            </div>
-          </div>
-        </section>
-        <section className="bg-gray-100 relative rounded-md divide-y divide-dashed">
-          <div className="flex flex-row gap-4 p-4">
-            <Skeleton className="h-10 w-10" />
-            <div className="relative overflow-auto">
-              <Skeleton className="h-4 w-52" />
-              <Skeleton className="h-4 w-80 mt-2" />
-            </div>
-          </div>
-          <div className="flex flex-row gap-4 p-4">
-            <Skeleton className="h-10 w-10" />
-            <div className="relative overflow-auto">
-              <Skeleton className="h-4 w-52" />
-              <Skeleton className="h-4 w-80 mt-2" />
-            </div>
-          </div>
-        </section>
-      </section>
-    </>
-  );
 
   const AvailabilitySection = () => (
     <>
-      <h5 className="text-md font-semibold">{props.availability?.label}</h5>
+      <h5 className="text-md font-semibold">{availability?.label}</h5>
       <section className="mt-2 space-y-1">
         <span className="flex flex-row items-center text-sm font-normal">
           <Clock className="w-4 h-4 inline mr-1" />
@@ -133,11 +66,11 @@ export function AvailabilityCard(props: AvailabilityProps) {
         </span>
         <span className="flex flex-row items-center text-sm font-normal">
           <Globe className="w-4 h-4 inline mr-1" />
-          {props.availability?.timezone}
+          {availability?.timezone}
         </span>
       </section>
       <section className="flex flex-col gap-4 my-6">
-        {props.availability?.days?.map((day, index) => (
+        {availability?.days?.map((day, index) => (
           <div
             className="flex w-full flex-col justify-between gap-4 last:mb-0 xl:flex-row xl:gap-12 xl:px-0"
             key={index}
@@ -199,12 +132,12 @@ export function AvailabilityCard(props: AvailabilityProps) {
         ))}
       </section>
       <section className="space-y-4">
-        {!props.availability?.connected_with_google ? (
+        {!availability?.connected_with_google ? (
           <ConnectWith provider={OAuthProvider.GOOGLE} />
         ) : (
           <InstalledApp provider={OAuthProvider.GOOGLE} />
         )}
-        {!props.availability?.connected_with_microsoft ? (
+        {!availability?.connected_with_microsoft ? (
           <ConnectWith provider={OAuthProvider.MICROSOFT} />
         ) : (
           <InstalledApp provider={OAuthProvider.MICROSOFT} />
@@ -247,14 +180,14 @@ export function AvailabilityCard(props: AvailabilityProps) {
           <SelectContent>
             {((v.itemType == "main" && (v.item as AvailabilityDay).enabled) ||
               v.itemType == "extend") && (
-              <SelectGroup>
-                {timeReference.map((time, index) => (
-                  <SelectItem key={index} value={time}>
-                    {time}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            )}
+                <SelectGroup>
+                  {timeReference.map((time, index) => (
+                    <SelectItem key={index} value={time}>
+                      {time}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              )}
           </SelectContent>
         </Select>
       )}
@@ -281,14 +214,14 @@ export function AvailabilityCard(props: AvailabilityProps) {
           <SelectContent>
             {((v.itemType == "main" && (v.item as AvailabilityDay).enabled) ||
               v.itemType == "extend") && (
-              <SelectGroup>
-                {timeReference.map((time, index) => (
-                  <SelectItem key={index} value={time}>
-                    {time}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            )}
+                <SelectGroup>
+                  {timeReference.map((time, index) => (
+                    <SelectItem key={index} value={time}>
+                      {time}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              )}
           </SelectContent>
         </Select>
       )}
@@ -298,7 +231,7 @@ export function AvailabilityCard(props: AvailabilityProps) {
   const InstalledApp = (v: { provider: OAuthProvider }) => (
     <>
       <section className="bg-gray-100 relative rounded-md divide-y divide-dashed">
-        {props.availability?.installed_apps?.calendars
+        {availability?.installed_apps?.calendars
           ?.filter((item) => item.provider === v.provider)
           .map((item, index) => (
             <div className="flex flex-row gap-4 p-4" key={index}>
@@ -331,7 +264,7 @@ export function AvailabilityCard(props: AvailabilityProps) {
               </div>
             </div>
           ))}
-        {props.availability?.installed_apps?.conferencing
+        {availability?.installed_apps?.conferencing
           ?.filter((item) => item.provider === v.provider)
           .map((item, index) => (
             <div className="flex flex-row gap-4 p-4" key={index}>
@@ -462,7 +395,7 @@ export function AvailabilityCard(props: AvailabilityProps) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${props.jwt}`,
+          Authorization: `Bearer ${jwtValue}`,
         },
         credentials: "include",
       });
@@ -503,7 +436,7 @@ export function AvailabilityCard(props: AvailabilityProps) {
       );
       const resp = await handleResponse<HttpResponse<Availability>>(req);
       const availabilityData = resp?.data;
-      props.callback(availabilityData);
+      setUserAvailability(availabilityData);
     } catch (error) {
       let em = "An unknown error occurred";
       if (error instanceof Error) {
@@ -528,7 +461,7 @@ export function AvailabilityCard(props: AvailabilityProps) {
     key: string,
     val: string,
   ) => {
-    if (!itemId && !val && !props.availability) return;
+    if (!itemId && !val && !availability) return;
 
     try {
       setLoadingStates((prevState) => ({
@@ -536,7 +469,7 @@ export function AvailabilityCard(props: AvailabilityProps) {
         [`select-${itemId}-${key}`]: true,
       }));
 
-      const availabilityDay = props.availability?.days?.find(
+      const availabilityDay = availability?.days?.find(
         (day) => day.id === dayId,
       );
       if (!availabilityDay) {
@@ -618,7 +551,7 @@ export function AvailabilityCard(props: AvailabilityProps) {
       );
       const resp = await handleResponse<HttpResponse<Availability>>(req);
       const availabilityData = resp?.data;
-      props.callback(availabilityData);
+      setUserAvailability(availabilityData);
     } catch (error) {
       let em = "An unknown error occurred";
       if (error instanceof Error) {
@@ -671,7 +604,7 @@ export function AvailabilityCard(props: AvailabilityProps) {
       );
       const resp = await handleResponse<HttpResponse<Availability>>(req);
       const availabilityData = resp?.data;
-      props.callback(availabilityData);
+      setUserAvailability(availabilityData);
     } catch (error) {
       let em = "An unknown error occurred";
       if (error instanceof Error) {
@@ -687,14 +620,14 @@ export function AvailabilityCard(props: AvailabilityProps) {
   };
 
   const removeExtendTime = async (dayId: string, timeId: string) => {
-    if (!dayId || !timeId || !props.availability?.days) return;
+    if (!dayId || !timeId || !availability?.days) return;
     try {
       setLoadingStates((prevState) => ({ ...prevState, [timeId]: true }));
       await fetch(API_PATH.AVAILABILITY_EXTEND_TIME(dayId, timeId), {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${props.jwt}`,
+          Authorization: `Bearer ${jwtValue}`,
         },
         credentials: "include",
       });
@@ -708,7 +641,7 @@ export function AvailabilityCard(props: AvailabilityProps) {
         description: <>{em}</>,
       });
     } finally {
-      const updatedAvailability = { ...props.availability };
+      const updatedAvailability = { ...availability };
       const updatedDays = updatedAvailability?.days?.map((day) => {
         if (day.id === dayId && day.extend_times) {
           const updatedExtendTimes = day.extend_times.filter(
@@ -722,7 +655,7 @@ export function AvailabilityCard(props: AvailabilityProps) {
         return day;
       });
       updatedAvailability.days = updatedDays;
-      props.callback(updatedAvailability);
+      setUserAvailability(updatedAvailability);
       setLoadingStates((prevState) => ({ ...prevState, [timeId]: false }));
     }
   };
@@ -736,7 +669,7 @@ export function AvailabilityCard(props: AvailabilityProps) {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${props.jwt}`,
+        Authorization: `Bearer ${jwtValue}`,
       },
       credentials: "include",
       body: payload,
@@ -745,7 +678,7 @@ export function AvailabilityCard(props: AvailabilityProps) {
 
   return (
     <>
-      {props?.loading && !props.availability ? (
+      {!availability ? (
         <AvailabilitySkeleton />
       ) : (
         <AvailabilitySection />

@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { timezoneReference } from "@/lib/time";
+import { timezoneReference } from "@/lib/reference";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -29,28 +29,21 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Loader2 } from "lucide-react";
-import {
-  API_PATH,
-  Availability,
-  HttpResponse,
-  handleResponse,
-} from "@/lib/user";
 import { useState } from "react";
 import { toast } from "./ui/use-toast";
-
-interface NewAvailabilityDialogProps {
-  jwt?: string;
-  callback(availability: Availability | null): void;
-}
+import { useUserStore } from "@/states/userStore";
+import { useAPI } from "@/hooks/useApi";
 
 const AvailabilityFormSchema = z.object({
   label: z.string(),
   timezone: z.string(),
 });
 
-export function NewAvailabilityDialog(props: NewAvailabilityDialogProps) {
+export function NewAvailabilityDialog() {
   const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const { setUserAvailability } = useUserStore();
+  const { useCreateAvailability } = useAPI();
+  const createAvailability = useCreateAvailability();
 
   const form = useForm<z.infer<typeof AvailabilityFormSchema>>({
     resolver: zodResolver(AvailabilityFormSchema),
@@ -62,22 +55,17 @@ export function NewAvailabilityDialog(props: NewAvailabilityDialogProps) {
 
   async function onSubmit(data: z.infer<typeof AvailabilityFormSchema>) {
     try {
-      setLoading(true);
-      const ar = await fetch(API_PATH.AVAILABILITY, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${props.jwt}`,
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          label: data.label,
-          timezone: data.timezone,
-        }),
+      const response = await createAvailability.mutateAsync({
+        label: data.label,
+        timezone: data.timezone,
       });
-      const availabilityData =
-        await handleResponse<HttpResponse<Availability>>(ar);
-      props?.callback(availabilityData?.data);
+      const availabilityData = response?.data ?? null;
+      setUserAvailability(availabilityData);
+      setOpen(false);
+      toast({
+        title: 'Success!',
+        description: 'Availability created successfully.',
+      });
     } catch (error) {
       let em = "An unknown error occurred";
       if (error instanceof Error) {
@@ -87,8 +75,6 @@ export function NewAvailabilityDialog(props: NewAvailabilityDialogProps) {
         title: "Error create new Availability",
         description: <>{em}</>,
       });
-    } finally {
-      setLoading(false);
     }
   }
 
@@ -99,7 +85,6 @@ export function NewAvailabilityDialog(props: NewAvailabilityDialogProps) {
           New Availability
         </Button>
       </DialogTrigger>
-
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Set Your Availability</DialogTitle>
@@ -157,8 +142,8 @@ export function NewAvailabilityDialog(props: NewAvailabilityDialogProps) {
                 )}
               />
             </div>
-            <Button type="submit" className="w-auto ml-auto" disabled={loading}>
-              {loading && <Loader2 className="w-4 animate-spin mr-1" />}
+            <Button type="submit" className="w-auto ml-auto" disabled={createAvailability.isLoading}>
+              {createAvailability.isLoading && <Loader2 className="w-4 animate-spin mr-1" />}
               Save changes
             </Button>
           </form>
