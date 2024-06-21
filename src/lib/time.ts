@@ -1,6 +1,14 @@
 export const intToDay = (numOfWeek: number): string => {
-  const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  const normalizedIndex = (numOfWeek % 7 + 7) % 7;
+  const daysOfWeek = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+  ];
+  const normalizedIndex = ((numOfWeek % 7) + 7) % 7;
   return daysOfWeek[normalizedIndex];
 };
 
@@ -12,7 +20,9 @@ export const intToTime = (timeInt: number): string => {
   const minute = timeInt % 100;
   const period = hour < 12 ? "am" : "pm";
   const formattedHour = hour % 12 || 12;
-  return `${formattedHour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}${period}`;
+  const formattedHourString = formattedHour.toString().padStart(2, "0");
+  const formattedMinuteString = minute.toString().padStart(2, "0");
+  return `${formattedHourString}:${formattedMinuteString}${period}`;
 };
 
 export const addOneHour = (time: number): number => {

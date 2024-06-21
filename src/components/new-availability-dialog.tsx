@@ -8,31 +8,21 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./ui/select";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { timezoneReference } from "@/lib/reference";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Loader2 } from "lucide-react";
-import { useState } from "react";
 import { toast } from "./ui/use-toast";
-import { useUserStore } from "@/states/userStore";
+import { useUserStore } from "@/stores/user";
 import { useAPI } from "@/hooks/useApi";
+import { useMutation } from "react-query";
+import { handleError } from "@/lib/http";
+import { useGlobalStateStore } from "@/stores/state";
+import { useState } from "react";
+import { GlobalStateKey } from "@/lib/enums";
 
 const AvailabilityFormSchema = z.object({
   label: z.string(),
@@ -41,10 +31,6 @@ const AvailabilityFormSchema = z.object({
 
 export function NewAvailabilityDialog() {
   const [open, setOpen] = useState(false);
-  const { setUserAvailability } = useUserStore();
-  const { useCreateAvailability } = useAPI();
-  const createAvailability = useCreateAvailability();
-
   const form = useForm<z.infer<typeof AvailabilityFormSchema>>({
     resolver: zodResolver(AvailabilityFormSchema),
     defaultValues: {
@@ -52,31 +38,27 @@ export function NewAvailabilityDialog() {
       timezone: "Asia/Singapore",
     },
   });
+  const { newAvailability } = useAPI();
+  const { setUserAvailability } = useUserStore();
+  const { setState } = useGlobalStateStore();
 
-  async function onSubmit(data: z.infer<typeof AvailabilityFormSchema>) {
-    try {
-      const response = await createAvailability.mutateAsync({
-        label: data.label,
-        timezone: data.timezone,
-      });
-      const availabilityData = response?.data ?? null;
-      setUserAvailability(availabilityData);
+  const createAvailability = useMutation(newAvailability, {
+    onSuccess: (resp) => {
+      setUserAvailability(resp?.data);
       setOpen(false);
       toast({
-        title: 'Success!',
-        description: 'Availability created successfully.',
+        title: "Success!",
+        description: "Availability created successfully.",
       });
-    } catch (error) {
-      let em = "An unknown error occurred";
-      if (error instanceof Error) {
-        em = error.message;
-      }
-      toast({
-        title: "Error create new Availability",
-        description: <>{em}</>,
-      });
-    }
-  }
+      setState(GlobalStateKey.DisplayNoAvailabilityModal, false);
+    },
+    onError: (error) => handleError(error),
+  });
+
+  const onSubmit = async (data: z.infer<typeof AvailabilityFormSchema>) => {
+    if (!data) return;
+    createAvailability.mutate(JSON.stringify(data));
+  };
 
   return (
     <Dialog open={open} onOpenChange={() => setOpen(!open)}>
@@ -89,15 +71,11 @@ export function NewAvailabilityDialog() {
         <DialogHeader>
           <DialogTitle>Set Your Availability</DialogTitle>
           <DialogDescription>
-            By setting your availability, you ensure others can see when you're
-            free and schedule accordingly.
+            By setting your availability, you ensure others can see when you're free and schedule accordingly.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="flex flex-col space-y-6"
-          >
+          <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col space-y-6">
             <div className="grid gap-4">
               <FormField
                 control={form.control}
@@ -118,10 +96,7 @@ export function NewAvailabilityDialog() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Timezone</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger className="col-span-3">
                           <SelectValue placeholder="Timezone" />

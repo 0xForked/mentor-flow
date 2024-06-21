@@ -1,74 +1,118 @@
-import { useMutation, UseMutationResult, UseQueryResult, useQuery } from 'react-query';
-import { Availability, User } from '@/lib/user';
-import { API_PATH, handleResponse, HttpResponse } from '@/lib/http';
-import { useUserStore } from '@/states/userStore';
-import { useJWTStore } from '@/states/jwtStore';
-
+import { OAuthProvider } from "@/lib/enums";
+import { API_PATH, HttpResponse } from "@/lib/http";
+import { Availability, User } from "@/lib/user";
+import { useJWTStore } from "@/stores/jwt";
 
 export function useAPI() {
-  const { jwtValue } = useJWTStore();
-  const { setUserProfile, setUserAvailability } = useUserStore();
+  const { jwtValue, clearJWT } = useJWTStore();
 
-  const useCreateAvailability = (): UseMutationResult<HttpResponse<Availability>, Error, Partial<Availability>, unknown> => {
-    return useMutation<HttpResponse<Availability>, Error, Partial<Availability>>(
-      async (data) => {
-        const response = await fetch(API_PATH.AVAILABILITY, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${jwtValue}`,
-          },
-          credentials: 'include',
-          body: JSON.stringify(data),
-        });
-        return handleResponse<HttpResponse<Availability>>(response);
-      }
-    );
-  }
+  const getProfile = async (): Promise<HttpResponse<User>> => {
+    const response = await fetch(API_PATH.PROFILE, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${jwtValue}`,
+      },
+      credentials: "include",
+    });
 
-  const useGetProfile = (): UseQueryResult<User | null, Error> => {
-    return useQuery<User | null, Error>(
-      ['profile', jwtValue],
-      async () => {
-        const pr = await fetch(API_PATH.PROFILE, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${jwtValue}`,
-          },
-          credentials: 'include',
-        });
-        const profileData = await handleResponse<HttpResponse<User>>(pr);
-        const pd = profileData?.data;
-        setUserProfile(pd);
-        return pd;
+    if (!response.ok) {
+      if (response.statusText.includes("Unauthorized")) {
+        clearJWT();
       }
-    );
+      throw new Error(`Failed to fetch profile: ${response.statusText}`);
+    }
+
+    return await response.json();
   };
 
-  const useGetAvailability = (): UseQueryResult<Availability | null, Error> => {
-    return useQuery<Availability | null, Error>(
-      ['availability', jwtValue],
-      async () => {
-        const ar = await fetch(API_PATH.AVAILABILITY, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${jwtValue}`,
-          },
-          credentials: 'include',
-        });
-        const availabilityData = await handleResponse<HttpResponse<Availability>>(ar);
-        const ad = availabilityData?.data;
-        setUserAvailability(ad);
-        return ad;
+  const getAvailability = async (): Promise<HttpResponse<Availability>> => {
+    const response = await fetch(API_PATH.AVAILABILITY, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${jwtValue}`,
+      },
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      if (response.statusText.includes("Unauthorized")) {
+        clearJWT();
       }
-    );
+      throw new Error(`Failed to fetch availability: ${response.statusText}`);
+    }
+
+    return await response.json();
+  };
+
+  const newAvailability = async (body: string): Promise<HttpResponse<Availability>> => {
+    const response = await fetch(API_PATH.AVAILABILITY, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${jwtValue}`,
+      },
+      credentials: "include",
+      body,
+    });
+
+    if (!response.ok) {
+      if (response.statusText.includes("Unauthorized")) {
+        clearJWT();
+      }
+      throw new Error(`Failed to create availability: ${response.statusText}`);
+    }
+
+    return await response.json();
+  };
+
+  const updateAvailability = async (body: string): Promise<HttpResponse<Availability>> => {
+    const response = await fetch(API_PATH.AVAILABILITY, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${jwtValue}`,
+      },
+      credentials: "include",
+      body,
+    });
+
+    if (!response.ok) {
+      if (response.statusText.includes("Unauthorized")) {
+        clearJWT();
+      }
+      throw new Error(`Failed to create availability: ${response.statusText}`);
+    }
+
+    return await response.json();
+  };
+
+  const newOAuthConnectUrl = async (provider: OAuthProvider): Promise<HttpResponse<string>> => {
+    const response = await fetch(API_PATH.OAUTH_WEB_CONNECT(provider), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${jwtValue}`,
+      },
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      if (response.statusText.includes("Unauthorized")) {
+        clearJWT();
+      }
+      throw new Error(`Failed to create availability: ${response.statusText}`);
+    }
+
+    return await response.json();
   };
 
   return {
-    useCreateAvailability,
-    useGetProfile,
-    useGetAvailability,
+    getProfile,
+    getAvailability,
+    newAvailability,
+    updateAvailability,
+    newOAuthConnectUrl,
   };
 }

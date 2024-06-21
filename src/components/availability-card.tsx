@@ -1,51 +1,22 @@
-import {
-  Availability,
-  AvailabilityDay,
-  ExtendTime,
-} from "@/lib/user";
-import {
-  API_PATH,
-  handleResponse,
-  HttpResponse,
-  OAuthProvider,
-} from "@/lib/http";
-import {
-  addOneHour,
-  intToDay,
-  intToTime,
-  strTimeToInt,
-} from "@/lib/time";
-import {
-  timeReference,
-} from "@/lib/reference";
+import { Availability, AvailabilityDay, ExtendTime } from "@/lib/user";
+import { API_PATH, handleResponse, HttpResponse } from "@/lib/http";
+import { addOneHour, intToDay, intToTime, strTimeToInt } from "@/lib/time";
+import { timeReference } from "@/lib/reference";
 import { Skeleton } from "./ui/skeleton";
 import googleLogo from "../assets/google.webp";
 import microsoftLogo from "../assets/microsoft.png";
 import { Button } from "./ui/button";
 import { Switch } from "./ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./ui/select";
-import {
-  ArrowLeftIcon,
-  Clock,
-  Globe,
-  Loader2,
-  PlusIcon,
-  TrashIcon,
-} from "lucide-react";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { ArrowLeftIcon, Clock, Globe, Loader2, PlusIcon, TrashIcon } from "lucide-react";
 import { Badge } from "./ui/badge";
 import { useState } from "react";
 import { toast } from "./ui/use-toast";
 import { capitalizeFirstChar } from "@/lib/utils";
-import { useJWTStore } from "@/states/jwtStore";
-import { useUserStore } from "@/states/userStore";
+import { useJWTStore } from "@/stores/jwt";
+import { useUserStore } from "@/stores/user";
 import { AvailabilitySkeleton } from "./skeletons/availability";
+import { OAuthProvider } from "@/lib/enums";
 
 interface LoadingStates {
   [key: string]: boolean;
@@ -80,9 +51,7 @@ export function AvailabilityCard() {
                 <Loader2 className="w-12 animate-spin" />
               ) : (
                 <Switch
-                  onCheckedChange={(checked: boolean) =>
-                    onDayStateChange(checked, day)
-                  }
+                  onCheckedChange={(checked: boolean) => onDayStateChange(checked, day)}
                   defaultChecked={day.enabled}
                 />
               )}
@@ -95,11 +64,7 @@ export function AvailabilityCard() {
                     <div className="flex flex-row gap-2 items-center">
                       <DayRage dayId={day.id} item={day} itemType="main" />
                     </div>
-                    <Button
-                      variant="ghost"
-                      onClick={() => addNewExtendTime(day)}
-                      disabled={loadingStates[day.id]}
-                    >
+                    <Button variant="ghost" onClick={() => addNewExtendTime(day)} disabled={loadingStates[day.id]}>
                       {loadingStates[day.id] ? (
                         <Loader2 className="w-4 animate-spin" />
                       ) : (
@@ -146,11 +111,7 @@ export function AvailabilityCard() {
     </>
   );
 
-  const DayRage = (v: {
-    dayId: string;
-    item: AvailabilityDay | ExtendTime;
-    itemType: string;
-  }) => (
+  const DayRage = (v: { dayId: string; item: AvailabilityDay | ExtendTime; itemType: string }) => (
     <>
       {loadingStates[`select-${v.item.id}-start_time`] ? (
         <Skeleton className="h-[40px] w-[100px] bg-gray-200 flex ">
@@ -158,36 +119,23 @@ export function AvailabilityCard() {
         </Skeleton>
       ) : (
         <Select
-          disabled={
-            v.itemType != "extend"
-              ? !(v.item as AvailabilityDay).enabled
-              : false
-          }
+          disabled={v.itemType != "extend" ? !(v.item as AvailabilityDay).enabled : false}
           defaultValue={intToTime(v.item.start_time)}
-          onValueChange={(value: string) =>
-            onTimeValueChange(
-              v.item.id,
-              v.dayId,
-              v.itemType,
-              "start_time",
-              value,
-            )
-          }
+          onValueChange={(value: string) => onTimeValueChange(v.item.id, v.dayId, v.itemType, "start_time", value)}
         >
           <SelectTrigger className="w-[100px]">
             <SelectValue placeholder="Start" />
           </SelectTrigger>
           <SelectContent>
-            {((v.itemType == "main" && (v.item as AvailabilityDay).enabled) ||
-              v.itemType == "extend") && (
-                <SelectGroup>
-                  {timeReference.map((time, index) => (
-                    <SelectItem key={index} value={time}>
-                      {time}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              )}
+            {((v.itemType == "main" && (v.item as AvailabilityDay).enabled) || v.itemType == "extend") && (
+              <SelectGroup>
+                {timeReference.map((time, index) => (
+                  <SelectItem key={index} value={time}>
+                    {time}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            )}
           </SelectContent>
         </Select>
       )}
@@ -198,30 +146,23 @@ export function AvailabilityCard() {
         </Skeleton>
       ) : (
         <Select
-          disabled={
-            v.itemType != "extend"
-              ? !(v.item as AvailabilityDay).enabled
-              : false
-          }
+          disabled={v.itemType != "extend" ? !(v.item as AvailabilityDay).enabled : false}
           defaultValue={intToTime(v.item.end_time)}
-          onValueChange={(value: string) =>
-            onTimeValueChange(v.item.id, v.dayId, v.itemType, "end_time", value)
-          }
+          onValueChange={(value: string) => onTimeValueChange(v.item.id, v.dayId, v.itemType, "end_time", value)}
         >
           <SelectTrigger className="w-[100px]">
             <SelectValue placeholder="End" />
           </SelectTrigger>
           <SelectContent>
-            {((v.itemType == "main" && (v.item as AvailabilityDay).enabled) ||
-              v.itemType == "extend") && (
-                <SelectGroup>
-                  {timeReference.map((time, index) => (
-                    <SelectItem key={index} value={time}>
-                      {time}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              )}
+            {((v.itemType == "main" && (v.item as AvailabilityDay).enabled) || v.itemType == "extend") && (
+              <SelectGroup>
+                {timeReference.map((time, index) => (
+                  <SelectItem key={index} value={time}>
+                    {time}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            )}
           </SelectContent>
         </Select>
       )}
@@ -235,23 +176,16 @@ export function AvailabilityCard() {
           ?.filter((item) => item.provider === v.provider)
           .map((item, index) => (
             <div className="flex flex-row gap-4 p-4" key={index}>
-              <img
-                className="h-8 w-8 mt-2"
-                src={item.logo}
-                alt="google-calendar-logo"
-              />
+              <img className="h-8 w-8 mt-2" src={item.logo} alt="google-calendar-logo" />
               <div className="relative overflow-auto">
                 <h5 className="text-md font-semibold">{item.name}</h5>
                 <p className="text-xs text-gray-600">
-                  Toggle the calendars you want to check for conflicts to
-                  prevent double bookings
+                  Toggle the calendars you want to check for conflicts to prevent double bookings
                 </p>
                 <div className="flex flex-row items-center gap-2 mt-4">
                   <Switch
                     defaultChecked={true}
-                    onCheckedChange={(checked: boolean) =>
-                      onCalendarStateChange(checked, v.provider)
-                    }
+                    onCheckedChange={(checked: boolean) => onCalendarStateChange(checked, v.provider)}
                   />
                   <span className="text-xs">{item.email} (Calendar)</span>
                   {item.is_default && (
@@ -268,11 +202,7 @@ export function AvailabilityCard() {
           ?.filter((item) => item.provider === v.provider)
           .map((item, index) => (
             <div className="flex flex-row gap-4 p-4" key={index}>
-              <img
-                className="h-10 w-10"
-                src={item.logo}
-                alt="google-meet-logo"
-              />
+              <img className="h-10 w-10" src={item.logo} alt="google-meet-logo" />
               <div className="relative overflow-auto">
                 <h5 className="text-md font-semibold">
                   {item.name}
@@ -304,16 +234,8 @@ export function AvailabilityCard() {
               <Loader2 className="w-4 animate-spin mr-1" />
             ) : (
               <img
-                className={
-                  v.provider == OAuthProvider.GOOGLE
-                    ? "w-6 h-6 mr-2"
-                    : "w-[20px] h-[20px] mr-2"
-                }
-                src={
-                  v.provider == OAuthProvider.GOOGLE
-                    ? googleLogo
-                    : microsoftLogo
-                }
+                className={v.provider == OAuthProvider.GOOGLE ? "w-6 h-6 mr-2" : "w-[20px] h-[20px] mr-2"}
+                src={v.provider == OAuthProvider.GOOGLE ? googleLogo : microsoftLogo}
                 alt={v.provider + "-logo"}
               />
             )}
@@ -333,8 +255,7 @@ export function AvailabilityCard() {
             />
             <div className="relative overflow-auto">
               <h5 className="text-md font-semibold">
-                {v.provider == OAuthProvider.GOOGLE ? "Google" : "Outlook"}{" "}
-                Calendar
+                {v.provider == OAuthProvider.GOOGLE ? "Google" : "Outlook"} Calendar
               </h5>
               <p className="text-xs text-gray-600 truncate overflow-hidden ...">
                 {v.provider == OAuthProvider.GOOGLE
@@ -353,9 +274,7 @@ export function AvailabilityCard() {
           </div>
           <div className="flex flex-row gap-4 p-4">
             <img
-              className={
-                v.provider == OAuthProvider.GOOGLE ? "h-10 w-10" : "h-8 w-8"
-              }
+              className={v.provider == OAuthProvider.GOOGLE ? "h-10 w-10" : "h-8 w-8"}
               src={
                 v.provider == OAuthProvider.GOOGLE
                   ? "https://stgreenskills001.blob.core.windows.net/assets/google-meet-logo.webp"
@@ -454,13 +373,7 @@ export function AvailabilityCard() {
     }
   };
 
-  const onTimeValueChange = async (
-    itemId: string,
-    dayId: string,
-    itemType: string,
-    key: string,
-    val: string,
-  ) => {
+  const onTimeValueChange = async (itemId: string, dayId: string, itemType: string, key: string, val: string) => {
     if (!itemId && !val && !availability) return;
 
     try {
@@ -469,9 +382,7 @@ export function AvailabilityCard() {
         [`select-${itemId}-${key}`]: true,
       }));
 
-      const availabilityDay = availability?.days?.find(
-        (day) => day.id === dayId,
-      );
+      const availabilityDay = availability?.days?.find((day) => day.id === dayId);
       if (!availabilityDay) {
         throw new Error("Availability day not found");
       }
@@ -495,18 +406,14 @@ export function AvailabilityCard() {
           const timeValue = strTimeToInt(val);
           // Validate: if end_time <= start_time, throw error
           if (timeValue <= availabilityDay.start_time) {
-            throw Error(
-              "Invalid end time: End time cannot be earlier than or equal with start time.",
-            );
+            throw Error("Invalid end time: End time cannot be earlier than or equal with start time.");
           }
           availabilityDay.end_time = timeValue;
         }
       }
 
       if (itemType == "extend") {
-        const extendTime = availabilityDay.extend_times?.find(
-          (time) => time.id === itemId,
-        );
+        const extendTime = availabilityDay.extend_times?.find((time) => time.id === itemId);
         if (!extendTime) {
           throw new Error("Extend time not found");
         }
@@ -528,9 +435,7 @@ export function AvailabilityCard() {
           const timeValue = strTimeToInt(val);
           // Validate: if end_time <= start_time, throw error
           if (timeValue <= extendTime.start_time) {
-            throw Error(
-              "Invalid end time: End time cannot be earlier than or equal with start time.",
-            );
+            throw Error("Invalid end time: End time cannot be earlier than or equal with start time.");
           }
           extendTime.end_time = timeValue;
         }
@@ -644,9 +549,7 @@ export function AvailabilityCard() {
       const updatedAvailability = { ...availability };
       const updatedDays = updatedAvailability?.days?.map((day) => {
         if (day.id === dayId && day.extend_times) {
-          const updatedExtendTimes = day.extend_times.filter(
-            (extendTime) => extendTime.id !== timeId,
-          );
+          const updatedExtendTimes = day.extend_times.filter((extendTime) => extendTime.id !== timeId);
           return {
             ...day,
             extend_times: updatedExtendTimes,
@@ -676,13 +579,5 @@ export function AvailabilityCard() {
     });
   };
 
-  return (
-    <>
-      {!availability ? (
-        <AvailabilitySkeleton />
-      ) : (
-        <AvailabilitySection />
-      )}
-    </>
-  );
+  return <>{!availability ? <AvailabilitySkeleton /> : <AvailabilitySection />}</>;
 }

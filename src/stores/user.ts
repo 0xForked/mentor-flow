@@ -1,15 +1,18 @@
-import { Availability, ProfileStatus, User } from '@/lib/user';
-import { create } from 'zustand';
+import { Availability, ProfileStatus, User } from "@/lib/user";
+import { create } from "zustand";
 
-interface UserStore {
+interface States {
   profile: User | null;
   availability: Availability | null;
   profileStatus: ProfileStatus;
+}
+
+interface Actions {
   setUserProfile: (profile: User | null) => void;
   setUserAvailability: (availability: Availability | null) => void;
 }
 
-export const useUserStore = create<UserStore>((set, get) => {
+export const useUserStore = create<States & Actions>((set, get) => {
   const updateProfileStatus = () => {
     const { profile, availability } = get();
     const newStatus: Partial<ProfileStatus> = {

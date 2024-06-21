@@ -1,103 +1,42 @@
-import {
-  User,
-  Availability,
-} from "@/lib/user";
-import {
-  API_PATH,
-  handleResponse,
-  HttpResponse,
-} from "@/lib/http";
-import { useCallback, useEffect, useState } from "react";
+import { User, Availability } from "@/lib/user";
+import { handleError, HttpResponse } from "@/lib/http";
 import { PackageOpenIcon } from "lucide-react";
 import { NewAvailabilityDialog } from "./new-availability-dialog";
 import { ProfileCard } from "./profile-card";
-import { AvailabilityCard } from "./profile-availability-card";
-import { useJWTStore } from "@/states/jwtStore";
-import { useUserStore } from "@/states/userStore";
-import { toast } from "./ui/use-toast";
+import { AvailabilityCard } from "./availability-card";
+import { useUserStore } from "@/stores/user";
+import { useAPI } from "@/hooks/useApi";
+import { useQuery } from "react-query";
+import { useGlobalStateStore } from "@/stores/state";
+import { GlobalStateKey } from "@/lib/enums";
 
 export function ProfileContainer() {
-  const { jwtValue, jwtKey, setJWT } = useJWTStore();
-  const { availability, setUserProfile, setUserAvailability } = useUserStore();
-  const [notFound, setNotFound] = useState(false);
+  const { getProfile, getAvailability } = useAPI();
+  const { setUserProfile, setUserAvailability } = useUserStore();
+  const { states, setState } = useGlobalStateStore();
 
-  const getProfile = useCallback(async () => {
-    try {
-      const pr = await fetch(API_PATH.PROFILE, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${jwtValue}`,
-        },
-        credentials: "include",
-      });
-      const profileData = await handleResponse<HttpResponse<User>>(pr);
-      const pd = profileData?.data;
-      setUserProfile(pd);
-    } catch (error) {
-      let msg = "An unknown error occurred"
-      if (error instanceof Response) {
-        const errorData = await error.json();
-        msg = errorData.message || "An error occurred while fetching profile data."
-      }
-      if (error instanceof Error) {
-        msg = error.message;
-      }
-      toast({
-        title: "Error fetching profile data",
-        description: <>{msg}</>,
-      });
-    }
-  }, [jwtValue, setUserProfile]);
+  useQuery<HttpResponse<User>>("profile", getProfile, {
+    onSuccess: (resp) => setUserProfile(resp?.data),
+    onError: (error) => handleError(error),
+    retry: false,
+  });
 
-  const getAvailability = useCallback(async () => {
-    try {
-      const ar = await fetch(API_PATH.AVAILABILITY, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${jwtValue}`,
-        },
-        credentials: "include",
-      });
-      const availabilityData =
-        await handleResponse<HttpResponse<Availability>>(ar);
-      const ad = availabilityData?.data;
-      setUserAvailability(ad);
-    } catch (error) {
-      let msg = "An unknown error occurred"
-      if (error instanceof Response) {
-        const errorData = await error.json();
-        msg = errorData.message || "An error occurred while fetching profile data."
+  // TODO: in update data invalidate availability
+  //   const queryClient = useQueryClient()
+  //   onSuccess => queryClient.invalidateQueries('availability')
+  useQuery<HttpResponse<Availability>>("availability", getAvailability, {
+    onSuccess: (resp) => {
+      setUserAvailability(resp?.data);
+      setState(GlobalStateKey.DisplayNoAvailabilityModal, false);
+    },
+    onError: (error: unknown) => {
+      handleError(error);
+      if (error instanceof Error && error.message?.includes("Not Found")) {
+        setState(GlobalStateKey.DisplayNoAvailabilityModal, true);
       }
-      if (error instanceof Error) {
-        msg = error.message;
-      }
-      toast({
-        title: "Error fetching availability data",
-        description: <>{msg}</>,
-      });
-      setNotFound(msg?.includes("404"))
-      if (msg?.includes("401")) {
-        localStorage.removeItem(jwtKey)
-        setJWT("")
-      }
-    }
-  }, [jwtValue, setUserAvailability, jwtKey, setJWT]);
-
-  useEffect(() => {
-    if (!jwtValue) {
-      window.location.reload();
-      return;
-    }
-
-    return () => {
-      (async () => {
-        setNotFound(false);
-        await Promise.all([getProfile(), getAvailability()]);
-      })();
-    };
-  }, [jwtValue, getProfile, getAvailability]);
+    },
+    retry: false,
+  });
 
   return (
     <main className="grid grid-cols-3 w-full">
@@ -109,13 +48,12 @@ export function ProfileContainer() {
       <aside className="relative w-full overflow-hidden rounded-r-xl border border-dashed border-gray-400 opacity-75 p-4 col-span-2">
         Availability
         <hr className="border-dashed my-4" />
-        {!availability && notFound ? (
+        {states[GlobalStateKey.DisplayNoAvailabilityModal] ? (
           <div className="flex flex-col">
             <PackageOpenIcon className="h-14 w-14 mx-auto" />
             <h5 className="text-md font-semibold mx-auto mt-2">No Data</h5>
             <p className="text-sm font-light mx-auto w-2/3 text-center">
-              We couldn't find your availability. Please create new availability
-              data!
+              We couldn't find your availability. Please create new availability data!
             </p>
             <NewAvailabilityDialog />
           </div>

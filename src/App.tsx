@@ -3,7 +3,7 @@ import { JWTForm } from "./components/jwt-form";
 import { useEffect } from "react";
 import { ProfileContainer } from "./components/profile-container";
 import { useLocalStorage } from "./hooks/useLocalStorage";
-import { useJWTStore } from "./states/jwtStore";
+import { useJWTStore } from "./stores/jwt";
 
 function App() {
   const { setCache, getCache, clearExpiredCache } = useLocalStorage();
@@ -11,10 +11,8 @@ function App() {
 
   useEffect(() => {
     const jwt = getCache(jwtKey);
-    if (jwt) {
-      setJWT(jwt);
-    }
-    const intervalTime = 30 * 1000 // 30s
+    if (jwt) setJWT(jwt);
+    const intervalTime = 30 * 1000; // 30s
     const interval = setInterval(() => {
       clearExpiredCache(clearJWT);
     }, intervalTime);
@@ -22,7 +20,7 @@ function App() {
   }, [getCache, clearExpiredCache, jwtKey, setJWT, clearJWT]);
 
   const onJWTUpdated = (jwt: string) => {
-    const cacheTime = 30 * 60 * 1000 // 30m
+    const cacheTime = 30 * 60 * 1000; // 30m
     setCache(jwtKey, jwt, cacheTime);
     setJWT(jwt);
   };
@@ -34,13 +32,8 @@ function App() {
           <img src={reactLogo} className="logo react" alt="React logo" />
         </a>
       </div>
-
       <div className="flex w-1/2 justify-center mx-auto mb-32">
-        {!jwtValue ? (
-          <JWTForm callback={onJWTUpdated} />
-        ) : (
-          <ProfileContainer />
-        )}
+        {!jwtValue ? <JWTForm callback={onJWTUpdated} /> : <ProfileContainer />}
       </div>
     </>
   );
