@@ -46,7 +46,7 @@ export function useAPI() {
     return await response.json();
   };
 
-  const newAvailability = async (body: string): Promise<HttpResponse<Availability>> => {
+  const createNewAvailability = async (body: string): Promise<HttpResponse<Availability>> => {
     const response = await fetch(API_PATH.AVAILABILITY, {
       method: "POST",
       headers: {
@@ -88,7 +88,28 @@ export function useAPI() {
     return await response.json();
   };
 
-  const newOAuthConnectUrl = async (provider: OAuthProvider): Promise<HttpResponse<string>> => {
+  const deleteAvailabilityExtendTime = async (p: { dayId: string, timeId: string }): Promise<HttpResponse<string>> => {
+    const response = await fetch(API_PATH.AVAILABILITY_EXTEND_TIME(p.dayId, p.timeId), {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${jwtValue}`,
+      },
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      if (response.statusText.includes("Unauthorized")) {
+        clearJWT();
+      }
+      throw new Error(`Failed to delete extend time: ${response.statusText}`);
+    }
+
+    // avoid get error cause by NoContent respond
+    return { data: '' } as HttpResponse<string>;
+  };
+
+  const createNewOAuthConnectUrl = async (provider: OAuthProvider): Promise<HttpResponse<string>> => {
     const response = await fetch(API_PATH.OAUTH_WEB_CONNECT(provider), {
       method: "POST",
       headers: {
@@ -111,8 +132,9 @@ export function useAPI() {
   return {
     getProfile,
     getAvailability,
-    newAvailability,
+    createNewAvailability,
     updateAvailability,
-    newOAuthConnectUrl,
+    deleteAvailabilityExtendTime,
+    createNewOAuthConnectUrl,
   };
 }

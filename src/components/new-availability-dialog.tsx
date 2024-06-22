@@ -38,11 +38,11 @@ export function NewAvailabilityDialog() {
       timezone: "Asia/Singapore",
     },
   });
-  const { newAvailability } = useAPI();
+  const { createNewAvailability } = useAPI();
   const { setUserAvailability } = useUserStore();
   const { setState } = useGlobalStateStore();
 
-  const createAvailability = useMutation(newAvailability, {
+  const createAvailability = useMutation(createNewAvailability, {
     onSuccess: (resp) => {
       setUserAvailability(resp?.data);
       setOpen(false);

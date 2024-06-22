@@ -15,10 +15,13 @@ interface Actions {
 export const useGlobalStateStore = create<States & Actions>((set) => ({
   states: {},
   setState: (key: string, value: boolean) =>
-    set((state) => ({
-      states: {
-        ...state.states,
-        [key]: value,
-      },
-    })),
+    set((state) => {
+      const newStates = { ...state.states };
+      if (value) {
+        newStates[key] = value;
+      } else {
+        delete newStates[key];
+      }
+      return { states: newStates };
+    }),
 }));

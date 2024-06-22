@@ -5,4 +5,5 @@ export enum OAuthProvider {
 
 export enum GlobalStateKey {
   DisplayNoAvailabilityModal = "display_no_availability_modal",
+  UpdateAvailabilityData = "update_availability_data"
 }

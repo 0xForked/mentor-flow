@@ -6,6 +6,13 @@ import { ProfileSkeleton } from "./skeletons/profile";
 export function ProfileCard() {
   const { profile, profileStatus } = useUserStore();
 
+  const statusItems = [
+    { label: 'Mentor', value: profileStatus.isMentor },
+    { label: 'Availability', value: profileStatus.availabilityDataExist },
+    { label: 'Calendar App Integration', value: profileStatus.calendarAppIntegration },
+    { label: 'Conference App Integration', value: profileStatus.conferenceAppIntegration },
+  ];
+
   return (
     <>
       {!profile ? (
@@ -22,38 +29,16 @@ export function ProfileCard() {
             </section>
           </div>
           <div className="p-4">
-            <div className="flex items-center gap-2 text-xs">
-              {!profileStatus?.isMentor ? (
-                <XIcon className="w-4 text-red-500" />
-              ) : (
-                <CheckIcon className="w-4 text-green-500" />
-              )}
-              Mentor
-            </div>
-            <div className="flex items-center gap-2 text-xs">
-              {!profileStatus?.availabilityDataExist ? (
-                <XIcon className="w-4 text-red-500" />
-              ) : (
-                <CheckIcon className="w-4 text-green-500" />
-              )}
-              Availability
-            </div>
-            <div className="flex items-center gap-2 text-xs">
-              {!profileStatus?.calendarAppIntegration ? (
-                <XIcon className="w-4 text-red-500" />
-              ) : (
-                <CheckIcon className="w-4 text-green-500" />
-              )}
-              Calendar App Integration
-            </div>
-            <div className="flex items-center gap-2 text-xs">
-              {!profileStatus?.conferenceAppIntegration ? (
-                <XIcon className="w-4 text-red-500" />
-              ) : (
-                <CheckIcon className="w-4 text-green-500" />
-              )}
-              Conference App Integration
-            </div>
+            {statusItems.map((item, index) => (
+              <div key={index} className="flex items-center gap-2 text-xs">
+                {item.value ? (
+                  <CheckIcon className="w-4 text-green-500" />
+                ) : (
+                  <XIcon className="w-4 text-red-500" />
+                )}
+                {item.label}
+              </div>
+            ))}
           </div>
         </>
       )}

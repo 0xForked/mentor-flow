@@ -30,6 +30,7 @@ function getCacheItem(key: string): string | null {
 
 function clearExpiredCacheItems(...stateActions: StateAction[]): void {
   const now = new Date().getTime();
+  const expiredKeys: string[] = [];
   for (const key in localStorage) {
     if (!Object.prototype.hasOwnProperty.call(localStorage, key)) {
       continue;
@@ -38,11 +39,18 @@ function clearExpiredCacheItems(...stateActions: StateAction[]): void {
     if (!itemStr) {
       continue;
     }
-    const item: CacheItem = JSON.parse(itemStr);
-    if (item.expiry && now > item.expiry) {
-      localStorage.removeItem(key);
-      stateActions.forEach((action) => action());
+    try {
+      const item: CacheItem = JSON.parse(itemStr);
+      if (item.expiry && now > item.expiry) {
+        expiredKeys.push(key);
+      }
+    } catch (e) {
+      continue;
     }
+  }
+  if (expiredKeys.length > 0) {
+    expiredKeys.forEach((key) => localStorage.removeItem(key));
+    stateActions.forEach((action) => action());
   }
 }
 

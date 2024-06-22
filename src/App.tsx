@@ -12,7 +12,7 @@ function App() {
   useEffect(() => {
     const jwt = getCache(jwtKey);
     if (jwt) setJWT(jwt);
-    const intervalTime = 30 * 1000; // 30s
+    const intervalTime = 5 * 60 * 1000; // 30s
     const interval = setInterval(() => {
       clearExpiredCache(clearJWT);
     }, intervalTime);

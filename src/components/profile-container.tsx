@@ -15,15 +15,12 @@ export function ProfileContainer() {
   const { setUserProfile, setUserAvailability } = useUserStore();
   const { states, setState } = useGlobalStateStore();
 
-  useQuery<HttpResponse<User>>("profile", getProfile, {
+  const profile = useQuery<HttpResponse<User>>("profile", getProfile, {
     onSuccess: (resp) => setUserProfile(resp?.data),
     onError: (error) => handleError(error),
     retry: false,
   });
 
-  // TODO: in update data invalidate availability
-  //   const queryClient = useQueryClient()
-  //   onSuccess => queryClient.invalidateQueries('availability')
   useQuery<HttpResponse<Availability>>("availability", getAvailability, {
     onSuccess: (resp) => {
       setUserAvailability(resp?.data);
@@ -43,7 +40,7 @@ export function ProfileContainer() {
       <aside className="relative w-full overflow-hidden rounded-l-xl border border-dashed border-gray-400 opacity-75 p-4">
         Profile
         <hr className="border-dashed my-4" />
-        <ProfileCard />
+        {profile.isError ? "Error get profile" : <ProfileCard />}
       </aside>
       <aside className="relative w-full overflow-hidden rounded-r-xl border border-dashed border-gray-400 opacity-75 p-4 col-span-2">
         Availability
