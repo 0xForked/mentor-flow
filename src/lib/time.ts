@@ -1,13 +1,5 @@
 export const intToDay = (numOfWeek: number): string => {
-  const daysOfWeek = [
-    "Sunday",
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-  ];
+  const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
   const normalizedIndex = ((numOfWeek % 7) + 7) % 7;
   return daysOfWeek[normalizedIndex];
 };

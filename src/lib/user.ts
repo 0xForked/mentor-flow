@@ -36,11 +36,13 @@ export interface InstalledApp {
 }
 
 export interface App {
+  id: string;
   provider: string;
   name: string;
   logo: string;
   description: string;
-  is_default: string;
+  is_default: boolean;
+  must_sync: boolean;
   email?: string;
 }
 

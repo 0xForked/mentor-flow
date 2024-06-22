@@ -2,15 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
 import { Loader2 } from "lucide-react";
@@ -46,9 +38,7 @@ export function JWTForm(props: JWTFormProps) {
       ),
     });
 
-    setTimeout(() => {
-      props.callback(data.jwt);
-    }, 500);
+    setTimeout(() => props.callback(data.jwt), 500);
   }
 
   return (
@@ -68,18 +58,15 @@ export function JWTForm(props: JWTFormProps) {
                 />
               </FormControl>
               <FormDescription>
-                You can obtain the <span className="underline">JWT</span> from
-                your browser's developer console in the Network tab - You know
-                lahh how to do that, right? #LOL.
+                You can obtain the <span className="underline">JWT</span> from your browser's developer console in the
+                Network tab - You know lahh how to do that, right? #LOL.
               </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
         <Button type="submit" disabled={form.formState.isSubmitSuccessful}>
-          {form.formState.isSubmitSuccessful && (
-            <Loader2 className="w-4 animate-spin mr-1" />
-          )}
+          {form.formState.isSubmitSuccessful && <Loader2 className="w-4 animate-spin mr-1" />}
           Submit
         </Button>
       </form>

@@ -16,21 +16,6 @@ export interface HttpResponse<T> {
   data: T | null;
 }
 
-export const handleResponse = async <T>(response: Response): Promise<T> => {
-  if (!response.ok) {
-    let errorMessage: string;
-    if (response.headers.get("Content-Type")?.includes("application/json")) {
-      const errorData = await response.json();
-      errorMessage = errorData.message || JSON.stringify(errorData);
-    } else {
-      errorMessage = await response.text();
-    }
-    throw new Error(`HTTP Error: ${response.status} - ${errorMessage}`);
-  }
-  const data: T = await response.json();
-  return data;
-};
-
 export const handleError = async (error: unknown) => {
   let em = "An unknown error occurred";
   if (error instanceof Response) {

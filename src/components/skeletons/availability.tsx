@@ -15,10 +15,7 @@ export const AvailabilitySkeleton = () => (
     </section>
     <section className="flex flex-col my-6 gap-4">
       {[0, 1, 2, 3, 4, 5, 6].map((item) => (
-        <div
-          className="flex flex-row justify-between items-center"
-          key={item}
-        >
+        <div className="flex flex-row justify-between items-center" key={item}>
           <div className="flex flex-row gap-2 items-center">
             <Skeleton className="h-8 w-12 rounded-xl" />
             <Skeleton className="h-4 w-28" />

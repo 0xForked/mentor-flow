@@ -10,6 +10,7 @@ interface States {
 
 interface Actions {
   setState: (key: string, value: boolean) => void;
+  cleanState: () => void;
 }
 
 export const useGlobalStateStore = create<States & Actions>((set) => ({
@@ -24,4 +25,5 @@ export const useGlobalStateStore = create<States & Actions>((set) => ({
       }
       return { states: newStates };
     }),
+  cleanState: () => set({ states: {} }),
 }));

@@ -88,7 +88,7 @@ export function useAPI() {
     return await response.json();
   };
 
-  const deleteAvailabilityExtendTime = async (p: { dayId: string, timeId: string }): Promise<HttpResponse<string>> => {
+  const deleteAvailabilityExtendTime = async (p: { dayId: string; timeId: string }): Promise<HttpResponse<string>> => {
     const response = await fetch(API_PATH.AVAILABILITY_EXTEND_TIME(p.dayId, p.timeId), {
       method: "DELETE",
       headers: {
@@ -106,7 +106,7 @@ export function useAPI() {
     }
 
     // avoid get error cause by NoContent respond
-    return { data: '' } as HttpResponse<string>;
+    return { data: "" } as HttpResponse<string>;
   };
 
   const createNewOAuthConnectUrl = async (provider: OAuthProvider): Promise<HttpResponse<string>> => {
