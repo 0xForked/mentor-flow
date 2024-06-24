@@ -21,7 +21,7 @@ export function ProfileContainer() {
     retry: false,
   });
 
-  useQuery<HttpResponse<Availability>>("availability", getAvailability, {
+  const availability = useQuery<HttpResponse<Availability>>("availability", getAvailability, {
     onSuccess: (resp) => {
       setUserAvailability(resp?.data);
       setState(GlobalStateKey.DisplayNoAvailabilityModal, false);
@@ -54,9 +54,7 @@ export function ProfileContainer() {
             </p>
             <NewAvailabilityDialog />
           </div>
-        ) : (
-          <AvailabilityCard />
-        )}
+        ) : (availability.isError ? "Error get profile" : <AvailabilityCard />)}
       </aside>
     </main>
   );

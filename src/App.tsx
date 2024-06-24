@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { HomePage } from "@/pages/home";
 import { MentorPage } from "@/pages/mentor";
 import { MenteePage } from "@/pages/mentee";
+import { ErrorPage } from "@/pages/error";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/mentor" element={<MentorPage />} />
             <Route path="/mentee" element={<MenteePage />} />
+            <Route path="/error" element={<ErrorPage />} />
           </Route>
         </Routes>
       </BrowserRouter>
