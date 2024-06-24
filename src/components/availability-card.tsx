@@ -5,6 +5,7 @@ import { OAuthProvider } from "@/lib/enums";
 import { InstalledApp } from "./installed-app";
 import { ConnectAccount } from "./connect-account";
 import { AvailabilityDaySection } from "./availability-day-section";
+import { getFormattedSchedule } from "@/lib/time";
 
 export function AvailabilityCard() {
   const { availability } = useUserStore();
@@ -17,9 +18,25 @@ export function AvailabilityCard() {
         <>
           <h5 className="text-md font-semibold">{availability?.label}</h5>
           <section className="mt-2 space-y-1">
-            <span className="flex flex-row items-center text-sm font-normal">
-              <Clock className="w-4 h-4 inline mr-1" />
-              Mon - Fri, 09:00 - 16:00
+            <span className="flex flex-row items-start gap-2 text-sm font-normal">
+              <Clock className="w-4 h-4 inline" />
+              <div className="flex flex-col">
+                {getFormattedSchedule(availability.days).map((item, index) => {
+                  const [dayPart, ...timeParts] = item.split(', ');
+                  return (
+                    <div className="flex flex-col" key={index}>
+                      {timeParts.length > 1 ? (<>
+                        <strong>{dayPart}:</strong>
+                        {timeParts.map((time, index) => (
+                          <div key={index}>
+                            {time}
+                          </div>
+                        ))}
+                      </>) : <p> <strong>{dayPart},</strong> {timeParts}</p>}
+                    </div>
+                  );
+                })}
+              </div>
             </span>
             <span className="flex flex-row items-center text-sm font-normal">
               <Globe className="w-4 h-4 inline mr-1" />

@@ -21,6 +21,7 @@ export const InstalledApp = ({ provider }: { provider: OAuthProvider }) => {
   });
 
   const onCalendarStateChange = (state: boolean, id: string) => {
+    if (!id) return;
     saveChanges.mutate(JSON.stringify({
       apps: [{
         "id": id,
