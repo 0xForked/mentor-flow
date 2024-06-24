@@ -22,13 +22,17 @@ export const InstalledApp = ({ provider }: { provider: OAuthProvider }) => {
 
   const onCalendarStateChange = (state: boolean, id: string) => {
     if (!id) return;
-    saveChanges.mutate(JSON.stringify({
-      apps: [{
-        "id": id,
-        "type": "calendar",
-        "must_sync": state
-      }]
-    }));
+    saveChanges.mutate(
+      JSON.stringify({
+        apps: [
+          {
+            id: id,
+            type: "calendar",
+            must_sync: state,
+          },
+        ],
+      }),
+    );
   };
 
   const renderAppDetails = (index: number, app: App, type: InstalledAppType) => (
@@ -50,7 +54,10 @@ export const InstalledApp = ({ provider }: { provider: OAuthProvider }) => {
         <p className="text-xs text-gray-600">{app.description}</p>
         {type === InstalledAppType.CALENDAR && (
           <div className="flex flex-row items-center gap-2 mt-4">
-            <Switch defaultChecked={app.must_sync} onCheckedChange={(checked) => onCalendarStateChange(checked, app.id)} />
+            <Switch
+              defaultChecked={app.must_sync}
+              onCheckedChange={(checked) => onCalendarStateChange(checked, app.id)}
+            />
             <span className="text-xs">{app.email} (Calendar)</span>
             {app.is_default && (
               <Badge className="bg-gray-200 text-black hover:bg-gray-200 hover:text-black py-1 rounded-sm">

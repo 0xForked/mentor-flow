@@ -40,7 +40,7 @@ export function ProfileContainer() {
       <aside className="relative w-full overflow-hidden rounded-l-xl border border-dashed border-gray-400 opacity-75 p-4">
         Profile
         <hr className="border-dashed my-4" />
-        {profile.isError ? "Error get profile" : <ProfileCard />}
+        {profile.isError ? "Error get profile - retry" : <ProfileCard />}
       </aside>
       <aside className="relative w-full overflow-hidden rounded-r-xl border border-dashed border-gray-400 opacity-75 p-4 col-span-2">
         Availability
@@ -54,7 +54,11 @@ export function ProfileContainer() {
             </p>
             <NewAvailabilityDialog />
           </div>
-        ) : (availability.isError ? "Error get profile" : <AvailabilityCard />)}
+        ) : availability.isError ? (
+          "Error get availability - retry"
+        ) : (
+          <AvailabilityCard />
+        )}
       </aside>
     </main>
   );

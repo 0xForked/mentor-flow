@@ -6,6 +6,7 @@ import { InstalledApp } from "./installed-app";
 import { ConnectAccount } from "./connect-account";
 import { AvailabilityDaySection } from "./availability-day-section";
 import { getFormattedSchedule } from "@/lib/time";
+import { CalendarEventTarget } from "./calendar-event-target";
 
 export function AvailabilityCard() {
   const { availability } = useUserStore();
@@ -22,17 +23,21 @@ export function AvailabilityCard() {
               <Clock className="w-4 h-4 inline" />
               <div className="flex flex-col">
                 {getFormattedSchedule(availability.days).map((item, index) => {
-                  const [dayPart, ...timeParts] = item.split(', ');
+                  const [dayPart, ...timeParts] = item.split(", ");
                   return (
                     <div className="flex flex-col" key={index}>
-                      {timeParts.length > 1 ? (<>
-                        <strong>{dayPart}:</strong>
-                        {timeParts.map((time, index) => (
-                          <div key={index}>
-                            {time}
-                          </div>
-                        ))}
-                      </>) : <p> <strong>{dayPart},</strong> {timeParts}</p>}
+                      {timeParts.length > 1 ? (
+                        <>
+                          <strong>{dayPart}:</strong>
+                          {timeParts.map((time, index) => (
+                            <div key={index}>{time}</div>
+                          ))}
+                        </>
+                      ) : (
+                        <p>
+                          <strong>{dayPart},</strong> {timeParts}
+                        </p>
+                      )}
                     </div>
                   );
                 })}
@@ -43,9 +48,10 @@ export function AvailabilityCard() {
               {availability?.timezone}
             </span>
           </section>
-          <section className="flex flex-col gap-4 my-6">
+          <section className="flex flex-col gap-4 my-4 bg-gray-100 relative rounded-md p-4">
             {availability?.days?.map((day, index) => <AvailabilityDaySection key={index} day={day} />)}
           </section>
+          <CalendarEventTarget />
           <section className="space-y-4">
             {!availability?.connected_with_google ? (
               <ConnectAccount provider={OAuthProvider.GOOGLE} />
