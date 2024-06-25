@@ -1,11 +1,11 @@
 import { OAuthProvider } from "@/lib/enums";
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import googleLogo from "../assets/google.webp";
-import microsoftLogo from "../assets/microsoft.png";
+import googleLogo from "@/assets/google.webp";
+import microsoftLogo from "@/assets/microsoft.png";
 import { capitalizeFirstChar } from "@/lib/utils";
 import { handleError } from "@/lib/http";
-import { toast } from "./ui/use-toast";
+import { toast } from "@/components/ui/use-toast";
 import { useAPI } from "@/hooks/useApi";
 import { useMutation } from "react-query";
 

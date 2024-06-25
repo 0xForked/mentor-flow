@@ -12,7 +12,7 @@ interface Actions {
   setUserAvailability: (availability: Availability | null) => void;
 }
 
-export const useUserStore = create<States & Actions>((set, get) => {
+export const useUserMentorStore = create<States & Actions>((set, get) => {
   const updateProfileStatus = () => {
     const { profile, availability } = get();
     const newStatus: Partial<ProfileStatus> = {

@@ -1,7 +1,7 @@
 import { InstalledAppType, OAuthProvider } from "@/lib/enums";
-import { useUserStore } from "@/stores/user";
-import { Switch } from "./ui/switch";
-import { Badge } from "./ui/badge";
+import { useUserMentorStore } from "@/stores/userMentor";
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
 import { ArrowLeftIcon } from "lucide-react";
 import { App } from "@/lib/user";
 import { useAPI } from "@/hooks/useApi";
@@ -9,7 +9,7 @@ import { handleError } from "@/lib/http";
 import { useMutation } from "react-query";
 
 export const InstalledApp = ({ provider }: { provider: OAuthProvider }) => {
-  const { availability, setUserAvailability } = useUserStore();
+  const { availability, setUserAvailability } = useUserMentorStore();
   const { updateAvailability } = useAPI();
 
   const saveChanges = useMutation(updateAvailability, {

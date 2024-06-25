@@ -1,24 +1,26 @@
 import { OAuthProvider } from "@/lib/enums";
 import { API_PATH, HttpResponse } from "@/lib/http";
 import { Availability, User } from "@/lib/user";
-import { useJWTStore } from "@/stores/jwt";
+import { useMentorJWTStore } from "@/stores/mentorJWT";
+// import { useMenteeJWTStore } from "@/stores/menteeJWT";
 
 export function useAPI() {
-  const { jwtValue, clearJWT } = useJWTStore();
+  const { mentorJWTValue, clearMentorJWT } = useMentorJWTStore();
+  // const { menteeJWTValue, clearMenteeJWT } = useMenteeJWTStore();
 
   const getProfile = async (): Promise<HttpResponse<User>> => {
     const response = await fetch(API_PATH.PROFILE, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${jwtValue}`,
+        Authorization: `Bearer ${mentorJWTValue}`,
       },
       credentials: "include",
     });
 
     if (!response.ok) {
       if (response.statusText.includes("Unauthorized")) {
-        clearJWT();
+        clearMentorJWT();
       }
       throw new Error(`Failed to fetch profile: ${response.statusText}`);
     }
@@ -31,14 +33,14 @@ export function useAPI() {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${jwtValue}`,
+        Authorization: `Bearer ${mentorJWTValue}`,
       },
       credentials: "include",
     });
 
     if (!response.ok) {
       if (response.statusText.includes("Unauthorized")) {
-        clearJWT();
+        clearMentorJWT();
       }
       throw new Error(`Failed to fetch availability: ${response.statusText}`);
     }
@@ -51,7 +53,7 @@ export function useAPI() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${jwtValue}`,
+        Authorization: `Bearer ${mentorJWTValue}`,
       },
       credentials: "include",
       body,
@@ -59,7 +61,7 @@ export function useAPI() {
 
     if (!response.ok) {
       if (response.statusText.includes("Unauthorized")) {
-        clearJWT();
+        clearMentorJWT();
       }
       throw new Error(`Failed to create availability: ${response.statusText}`);
     }
@@ -72,7 +74,7 @@ export function useAPI() {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${jwtValue}`,
+        Authorization: `Bearer ${mentorJWTValue}`,
       },
       credentials: "include",
       body,
@@ -80,7 +82,7 @@ export function useAPI() {
 
     if (!response.ok) {
       if (response.statusText.includes("Unauthorized")) {
-        clearJWT();
+        clearMentorJWT();
       }
       throw new Error(`Failed to create availability: ${response.statusText}`);
     }
@@ -93,14 +95,14 @@ export function useAPI() {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${jwtValue}`,
+        Authorization: `Bearer ${mentorJWTValue}`,
       },
       credentials: "include",
     });
 
     if (!response.ok) {
       if (response.statusText.includes("Unauthorized")) {
-        clearJWT();
+        clearMentorJWT();
       }
       throw new Error(`Failed to delete extend time: ${response.statusText}`);
     }
@@ -114,14 +116,14 @@ export function useAPI() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${jwtValue}`,
+        Authorization: `Bearer ${mentorJWTValue}`,
       },
       credentials: "include",
     });
 
     if (!response.ok) {
       if (response.statusText.includes("Unauthorized")) {
-        clearJWT();
+        clearMentorJWT();
       }
       throw new Error(`Failed to create availability: ${response.statusText}`);
     }

@@ -1,15 +1,15 @@
 import { Clock, Globe } from "lucide-react";
-import { useUserStore } from "@/stores/user";
-import { AvailabilitySkeleton } from "./skeletons/availability";
+import { useUserMentorStore } from "@/stores/userMentor";
+import { AvailabilitySkeleton } from "@/components/skeletons/availability";
 import { OAuthProvider } from "@/lib/enums";
-import { InstalledApp } from "./installed-app";
-import { ConnectAccount } from "./connect-account";
-import { AvailabilityDaySection } from "./availability-day-section";
+import { InstalledApp } from "@/components/mentor/installed-app";
+import { ConnectAccount } from "@/components/mentor/connect-account";
+import { AvailabilityDaySection } from "@/components/mentor/availability-day-section";
 import { getFormattedSchedule } from "@/lib/time";
-import { CalendarEventTarget } from "./calendar-event-target";
+import { CalendarEventTarget } from "@/components/mentor/calendar-event-target";
 
 export function AvailabilityCard() {
-  const { availability } = useUserStore();
+  const { availability } = useUserMentorStore();
 
   return (
     <>

@@ -1,12 +1,12 @@
 import { AvailabilityDay, ExtendTime } from "@/lib/user";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { timeReference } from "@/lib/reference";
-import { Skeleton } from "./ui/skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 import { addOneHour, intToTime, strTimeToInt } from "@/lib/time";
 import { Loader2 } from "lucide-react";
-import { toast } from "./ui/use-toast";
+import { toast } from "@/components/ui/use-toast";
 import { handleError } from "@/lib/http";
-import { useUserStore } from "@/stores/user";
+import { useUserMentorStore } from "@/stores/userMentor";
 import { useAPI } from "@/hooks/useApi";
 import { useGlobalStateStore } from "@/stores/state";
 import { useMutation } from "react-query";
@@ -19,7 +19,7 @@ interface Props {
 }
 
 export const AvailabilityTimeSection = (v: Props) => {
-  const { availability, setUserAvailability } = useUserStore();
+  const { availability, setUserAvailability } = useUserMentorStore();
   const { updateAvailability } = useAPI();
   const { states, setState, cleanState } = useGlobalStateStore();
 

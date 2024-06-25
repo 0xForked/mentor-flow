@@ -8,15 +8,15 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { timezoneReference } from "@/lib/reference";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Loader2 } from "lucide-react";
-import { toast } from "./ui/use-toast";
-import { useUserStore } from "@/stores/user";
+import { toast } from "@/components/ui/use-toast";
+import { useUserMentorStore } from "@/stores/userMentor";
 import { useAPI } from "@/hooks/useApi";
 import { useMutation } from "react-query";
 import { handleError } from "@/lib/http";
@@ -39,7 +39,7 @@ export function NewAvailabilityDialog() {
     },
   });
   const { createNewAvailability } = useAPI();
-  const { setUserAvailability } = useUserStore();
+  const { setUserAvailability } = useUserMentorStore();
   const { setState } = useGlobalStateStore();
 
   const createAvailability = useMutation(createNewAvailability, {

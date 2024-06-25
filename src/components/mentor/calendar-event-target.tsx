@@ -1,12 +1,12 @@
-import { useUserStore } from "@/stores/user";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { useUserMentorStore } from "@/stores/userMentor";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { capitalizeFirstChar } from "@/lib/utils";
 import { useMutation } from "react-query";
 import { handleError } from "@/lib/http";
 import { useAPI } from "@/hooks/useApi";
 
 export const CalendarEventTarget = () => {
-  const { availability, setUserAvailability } = useUserStore();
+  const { availability, setUserAvailability } = useUserMentorStore();
   const { updateAvailability } = useAPI();
 
   const saveChanges = useMutation(updateAvailability, {

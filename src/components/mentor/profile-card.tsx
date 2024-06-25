@@ -1,10 +1,10 @@
-import { Avatar, AvatarFallback } from "./ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { CheckIcon, XIcon } from "lucide-react";
-import { useUserStore } from "@/stores/user";
-import { ProfileSkeleton } from "./skeletons/profile";
+import { useUserMentorStore } from "@/stores/userMentor";
+import { ProfileSkeleton } from "@/components/skeletons/profile";
 
 export function ProfileCard() {
-  const { profile, profileStatus } = useUserStore();
+  const { profile, profileStatus } = useUserMentorStore();
 
   const statusItems = [
     { label: "Mentor", value: profileStatus.isMentor },

@@ -1,11 +1,11 @@
-import { useUserStore } from "@/stores/user";
-import { AvailabilityTimeSection } from "./availability-time-section";
+import { useUserMentorStore } from "@/stores/userMentor";
+import { AvailabilityTimeSection } from "@/components/mentor/availability-time-section";
 import { AvailabilityDay, ExtendTime } from "@/lib/user";
 import { handleError } from "@/lib/http";
 import { addOneHour, intToDay } from "@/lib/time";
 import { Loader2, PlusIcon, TrashIcon } from "lucide-react";
-import { Button } from "./ui/button";
-import { Switch } from "./ui/switch";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { useAPI } from "@/hooks/useApi";
 import { useMutation } from "react-query";
 import { useState } from "react";
@@ -14,7 +14,7 @@ import { GlobalStateKey } from "@/lib/enums";
 
 export const AvailabilityDaySection = (v: { day: AvailabilityDay }) => {
   const [loadingItem, setLoadingItem] = useState<string | null>(null);
-  const { availability, setUserAvailability } = useUserStore();
+  const { availability, setUserAvailability } = useUserMentorStore();
   const { updateAvailability, deleteAvailabilityExtendTime } = useAPI();
   const { states, setState } = useGlobalStateStore();
 

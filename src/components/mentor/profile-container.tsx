@@ -1,10 +1,10 @@
 import { User, Availability } from "@/lib/user";
 import { handleError, HttpResponse } from "@/lib/http";
 import { PackageOpenIcon } from "lucide-react";
-import { NewAvailabilityDialog } from "./new-availability-dialog";
-import { ProfileCard } from "./profile-card";
-import { AvailabilityCard } from "./availability-card";
-import { useUserStore } from "@/stores/user";
+import { NewAvailabilityDialog } from "@/components/mentor/new-availability-dialog";
+import { ProfileCard } from "@/components/mentor/profile-card";
+import { AvailabilityCard } from "@/components/mentor/availability-card";
+import { useUserMentorStore } from "@/stores/userMentor";
 import { useAPI } from "@/hooks/useApi";
 import { useQuery } from "react-query";
 import { useGlobalStateStore } from "@/stores/state";
@@ -12,7 +12,7 @@ import { GlobalStateKey } from "@/lib/enums";
 
 export function ProfileContainer() {
   const { getProfile, getAvailability } = useAPI();
-  const { setUserProfile, setUserAvailability } = useUserStore();
+  const { setUserProfile, setUserAvailability } = useUserMentorStore();
   const { states, setState } = useGlobalStateStore();
 
   const profile = useQuery<HttpResponse<User>>("profile", getProfile, {
