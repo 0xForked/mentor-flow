@@ -11,7 +11,7 @@ export const MentorPage = () => {
   useEffect(() => {
     const jwt = getCache(mentorJWTKey);
     if (jwt) setJWT(jwt);
-    const intervalTime = 5 * 60 * 1000; // 30s
+    const intervalTime = 5 * 60 * 1000; // 5m
     const interval = setInterval(() => {
       clearExpiredCache(clearMentorJWT);
     }, intervalTime);
@@ -24,7 +24,9 @@ export const MentorPage = () => {
     setJWT(jwt);
   };
 
-  return (<div className="flex w-1/2 justify-center mx-auto mb-32">
-    {!mentorJWTValue ? <JWTForm callback={onJWTUpdated} /> : <ProfileContainer />}
-  </div>)
-}
+  return (
+    <div className="flex w-1/2 justify-center mx-auto mb-32">
+      {!mentorJWTValue ? <JWTForm callback={onJWTUpdated} /> : <ProfileContainer />}
+    </div>
+  );
+};

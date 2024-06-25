@@ -1,7 +1,11 @@
 export interface User {
   id: string;
-  nick_name: string;
-  email: string;
+  nick_name?: string;
+  email?: string;
+  avatar?: string;
+  full_name?: string;
+  username?: string;
+  location?: string;
 }
 
 export interface Availability {
@@ -51,4 +55,17 @@ export interface ProfileStatus {
   availabilityDataExist: boolean;
   calendarAppIntegration: boolean;
   conferenceAppIntegration: boolean;
+}
+
+export interface MentorAvailabilitySlot {
+  availability?: Availability | null;
+  slots?: Slots | null;
+}
+
+export interface Slots {
+  [date: string]: SlotTime[];
+}
+
+export interface SlotTime {
+  time: string;
 }

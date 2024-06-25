@@ -1,12 +1,12 @@
 import { OAuthProvider } from "@/lib/enums";
-import { API_PATH, HttpResponse } from "@/lib/http";
-import { Availability, User } from "@/lib/user";
+import { API_PATH, HttpResponse, HttpResponseList } from "@/lib/http";
+import { Availability, MentorAvailabilitySlot, User } from "@/lib/user";
 import { useMentorJWTStore } from "@/stores/mentorJWT";
-// import { useMenteeJWTStore } from "@/stores/menteeJWT";
+import { useMenteeJWTStore } from "@/stores/menteeJWT";
 
 export function useAPI() {
   const { mentorJWTValue, clearMentorJWT } = useMentorJWTStore();
-  // const { menteeJWTValue, clearMenteeJWT } = useMenteeJWTStore();
+  const { menteeJWTValue, clearMenteeJWT } = useMenteeJWTStore();
 
   const getProfile = async (): Promise<HttpResponse<User>> => {
     const response = await fetch(API_PATH.PROFILE, {
@@ -131,6 +131,50 @@ export function useAPI() {
     return await response.json();
   };
 
+  const getMentors = async (): Promise<HttpResponse<HttpResponseList<User>>> => {
+    const response = await fetch(API_PATH.MENTOR, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${menteeJWTValue}`,
+      },
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      if (response.statusText.includes("Unauthorized")) {
+        clearMenteeJWT();
+      }
+      throw new Error(`Failed to fetch mentor lists: ${response.statusText}`);
+    }
+
+    return await response.json();
+  };
+
+  const getMentorAvailbilitySlots = async (p: {
+    userId: string;
+    timezone: string;
+    dateRange: string;
+  }): Promise<HttpResponse<MentorAvailabilitySlot>> => {
+    const response = await fetch(API_PATH.MENTOR_AVAILABILITY_SLOT(p.userId, p.timezone, p.dateRange), {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${menteeJWTValue}`,
+      },
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      if (response.statusText.includes("Unauthorized")) {
+        clearMenteeJWT();
+      }
+      throw new Error(`Failed to fetch mentor lists: ${response.statusText}`);
+    }
+
+    return await response.json();
+  };
+
   return {
     getProfile,
     getAvailability,
@@ -138,5 +182,7 @@ export function useAPI() {
     updateAvailability,
     deleteAvailabilityExtendTime,
     createNewOAuthConnectUrl,
+    getMentors,
+    getMentorAvailbilitySlots,
   };
 }

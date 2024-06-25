@@ -48,7 +48,7 @@ export const strTimeToInt = (timeStr: string): number => {
 export const getFormattedSchedule = (days?: AvailabilityDay[] | null): string[] => {
   if (!days) return [];
   const result: string[] = [];
-  const enabledDays = days.filter(day => day.enabled);
+  const enabledDays = days.filter((day) => day.enabled);
   const groupedTimes: { [key: string]: number[] } = {};
   for (const day of enabledDays) {
     const times = [`${intToTime(day.start_time)} - ${intToTime(day.end_time)}`];
@@ -57,7 +57,7 @@ export const getFormattedSchedule = (days?: AvailabilityDay[] | null): string[] 
         times.push(`${intToTime(extend.start_time)} - ${intToTime(extend.end_time)}`);
       }
     }
-    const formattedTimes = times.join(', ');
+    const formattedTimes = times.join(", ");
     if (!groupedTimes[formattedTimes]) {
       groupedTimes[formattedTimes] = [];
     }
@@ -74,4 +74,4 @@ export const getFormattedSchedule = (days?: AvailabilityDay[] | null): string[] 
     result.push(`${dayString}, ${times}`);
   }
   return result;
-}
+};
