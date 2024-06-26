@@ -12,7 +12,7 @@ export const API_PATH = {
   OAUTH_WEB_DISCONNECT: (provider: OAuthProvider) => `${API_URL}/v1/mentor-settings/oauth/${provider}/disconnect`,
   MENTOR: `${API_URL}/v2/community-members?profile_type=mentor`,
   MENTOR_AVAILABILITY_SLOT: (userId: string, timezone: string, dateRange: string) =>
-    `${API_URL}/v1/mentor-schedules/${userId}/availabilities?timezone=${timezone}&date_rage=${dateRange}`,
+    `${API_URL}/v1/mentor-schedules/${userId}/availabilities?timezone=${timezone}&date_range=${dateRange}`,
 };
 
 export interface HttpResponse<T> {

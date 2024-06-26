@@ -6,12 +6,12 @@ import { User } from "@/lib/user";
 import { capitalizeFirstChar } from "@/lib/utils";
 
 export function MentorCalendarLeftSide({
-  timeZone,
-  setTimeZone,
+  timezone,
+  setTimezone,
   mentor,
 }: {
-  timeZone: string;
-  setTimeZone: (timeZone: string) => void;
+  timezone: string;
+  setTimezone: (timeZone: string) => void;
   mentor?: User | null;
 }) {
   return (
@@ -48,14 +48,14 @@ export function MentorCalendarLeftSide({
           </Tooltip>
         </div> */}
 
-        <Select value={timeZone} onValueChange={setTimeZone}>
+        <Select value={timezone} onValueChange={setTimezone}>
           <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select time zone">{timeZone}</SelectValue>
+            <SelectValue placeholder="Select time zone">{timezone}</SelectValue>
           </SelectTrigger>
           <SelectContent className="w-fit dark:bg-gray-400">
-            {timezoneReference.map((timeZone) => (
-              <SelectItem key={timeZone} value={timeZone} className="dark:focus:bg-gray-100">
-                {timeZone}
+            {timezoneReference.map((timezone) => (
+              <SelectItem key={timezone} value={timezone} className="dark:focus:bg-gray-100">
+                {timezone}
               </SelectItem>
             ))}
           </SelectContent>

@@ -9,43 +9,92 @@ import type { DateValue } from "@react-aria/calendar";
 import { Calendar } from "@/components/ui/calendar";
 import { MentorCalendarLeftSide } from "./mentor-calendar-left-side";
 import { MentorCalendarRightSide } from "./mentor-calendar-right-side";
+import { useMutation } from "react-query";
+import { handleError } from "@/lib/http";
+import { useAPI } from "@/hooks/useApi";
+import { Slots } from "@/lib/user";
+import { convertToTimeFormats, getMonthEndTimes } from "@/lib/time";
 
 export const MentorBookingDialog = () => {
   const [open, setOpen] = useState(false);
   const { states, setState } = useGlobalStateStore();
-  const { selectedMentor, setSelectedMentor } = useUserMenteeStore();
+  const { selectedMentor, setSelectedMentor, setAvailabilitySlots, availabilitySlots } = useUserMenteeStore();
+  const { getMentorAvailbilitySlots } = useAPI();
   const { locale } = useLocale();
   const [date, setDate] = useState(today(getLocalTimeZone()));
   const [focusedDate, setFocusedDate] = useState<CalendarDate | null>(date);
-  const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
-  const [tz, setTimeZone] = useState(timeZone);
-
+  const [timezone, setTimezone] = useState(getLocalTimeZone());
   const weeksInMonth = getWeeksInMonth(focusedDate as DateValue, locale);
+  const [slots, setSlots] = useState<{ "12": string; "24": string; "full": string }[]>([]);
+  const [currentMonth, setCurrentMonth] = useState<number>(date.month);
+  // const [availableSlots, setAvailableSlots] = useState<string[]>([]);
 
-  useEffect(() => {
-    setOpen(states[GlobalStateKey.MentorCalendarDialog]);
-  }, [states, focusedDate]);
+  const mentorAvailability = useMutation(getMentorAvailbilitySlots, {
+    onSuccess: (resp) => setAvailabilitySlots(resp?.data),
+    onError: (error) => handleError(error),
+    retry: false,
+  });
 
-  if (selectedMentor) {
-    // call api
+  const getAvailabilitySlots = (endOfPrevMonth: string, endOfCurrMonth: string) => {
+    if (!selectedMentor) return;
+    mentorAvailability.mutate({
+      userId: selectedMentor.id,
+      timezone: timezone,
+      dateRange: `${endOfPrevMonth},${endOfCurrMonth}`
+    });
   }
 
+  useEffect(() => {
+    setOpen(states[GlobalStateKey.MentorCalendarDialog])
+    if (open && focusedDate && !availabilitySlots) {
+      const { endOfPrevMonth, endOfCurrMonth } = getMonthEndTimes(date.month, date.year);
+      getAvailabilitySlots(endOfPrevMonth, endOfCurrMonth)
+      generateSlot(focusedDate)
+    }
+  }, [open, states, focusedDate, availabilitySlots]);
+
   const handleDateChange = (date: DateValue) => {
-    setDate(date as CalendarDate);
-    console.log(date.toDate(tz).toISOString().split("T")[0]);
+    const newDate = date as CalendarDate;
+    setDate(newDate);
+    onMonthChange(newDate);
+    generateSlot(newDate);
   };
 
-  const handleAvailableTimeChange = (time: string) => {
+  const handleAvailableTimeChange = (time: string) =>
     console.log(time);
-  };
 
-  const handleFocusChange = (date: DateValue) => {
-    setFocusedDate(date as CalendarDate);
-    console.log(date.month);
-    // when it change, validate its different month, if yes get the data
-    // based on last month end date and current month end date
-    // then call the slots endpoint.
-  };
+  const handleFocusChange = (selectedDate: DateValue) =>
+    setFocusedDate(selectedDate as CalendarDate);
+
+  const onMonthChange = (newDate: DateValue) => {
+    if (newDate.month === currentMonth) return;
+    const { endOfPrevMonth, endOfCurrMonth } = getMonthEndTimes(newDate.month, newDate.year);
+    getAvailabilitySlots(endOfPrevMonth, endOfCurrMonth);
+    setCurrentMonth(newDate.month);
+  }
+
+  const generateSlot = (newDate: DateValue) => {
+    const selectedDateStr = formatedDate(newDate);
+    const data: Slots | null | undefined = availabilitySlots?.slots;
+    if (data && data[selectedDateStr]) {
+      setSlots(data[selectedDateStr].map(entry => convertToTimeFormats(entry.time)));
+      // setAvailableSlots(Object.keys(data))
+    } else {
+      setSlots([])
+    }
+  }
+
+  const formatedDate = (newDate: DateValue) => {
+    const y = newDate.year;
+    const m = newDate.month.toString().padStart(2, '0');
+    const d = newDate.day.toString().padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+
+  // const isDateUnavailable = (date: DateValue) => {
+  //   if (!slots && !availableSlots) return false;
+  //   return !availableSlots.includes(formatedDate(date))
+  // }
 
   const onOpenStateChange = () => {
     setOpen(!open);
@@ -63,17 +112,18 @@ export const MentorBookingDialog = () => {
           </DialogDescription>
         </DialogHeader>
         <div className="max-w-full w-full">
-          <div className="flex gap-6">
-            <MentorCalendarLeftSide mentor={selectedMentor} timeZone={tz} setTimeZone={setTimeZone} />
+          {(mentorAvailability.isLoading && !availabilitySlots) ? <>Loading . . .</> : <div className="flex gap-6">
+            <MentorCalendarLeftSide mentor={selectedMentor} timezone={timezone} setTimezone={setTimezone} />
             <Calendar
               minValue={today(getLocalTimeZone())}
               defaultValue={today(getLocalTimeZone())}
               value={date}
               onChange={handleDateChange}
               onFocusChange={(focused) => handleFocusChange(focused)}
+            // isDateUnavailable={isDateUnavailable}
             />
-            <MentorCalendarRightSide {...{ date, tz, weeksInMonth, handleAvailableTimeChange }} />
-          </div>
+            <MentorCalendarRightSide {...{ date, timezone, weeksInMonth, handleAvailableTimeChange, slots }} />
+          </div>}
         </div>
       </DialogContent>
     </Dialog>

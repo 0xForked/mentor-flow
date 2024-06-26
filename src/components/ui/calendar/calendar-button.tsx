@@ -21,7 +21,7 @@ export function Button(
       ref={ref}
       className={cn(
         "p-2 rounded-lg outline-none text-gray-900",
-        props.isDisabled ? "text-gray-500" : "hover:bg-gray-300 active:bg-gray-400",
+        props.isDisabled ? "text-gray-400" : "hover:bg-gray-300 active:bg-gray-400",
         isFocusVisible && "ring-2 ring-offset-2 ring-gray-800",
       )}
     >

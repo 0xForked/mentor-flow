@@ -75,3 +75,35 @@ export const getFormattedSchedule = (days?: AvailabilityDay[] | null): string[] 
   }
   return result;
 };
+
+export const getMonthEndTimes = (month: number, year: number) => {
+  let prevMonth = month - 1;
+  let prevMonthYear = year;
+  if (prevMonth === 0) {
+    prevMonth = 12;
+    prevMonthYear -= 1;
+  }
+  const lastDayPrevMonth = new Date(prevMonthYear, prevMonth, 0);
+  const lastDayCurrMonth = new Date(year, month, 0);
+  const formatDate = (date: Date) => {
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  };
+  return {
+    endOfPrevMonth: formatDate(lastDayPrevMonth),
+    endOfCurrMonth: formatDate(lastDayCurrMonth)
+  };
+}
+
+export const convertToTimeFormats = (timeString: string) => {
+  const date = new Date(timeString);
+  const hours24 = date.getUTCHours();
+  const minutes = date.getUTCMinutes();
+  const hours12 = hours24 % 12 || 12;
+  const ampm = hours24 >= 12 ? "pm" : "am";
+  const time12 = `${hours12}:${minutes.toString().padStart(2, "0")}${ampm}`;
+  const time24 = `${hours24.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+  return { "12": time12, "24": time24, "full": timeString };
+}

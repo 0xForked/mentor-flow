@@ -22,9 +22,11 @@ export function CalendarHeader({
     year: "numeric",
     timeZone: state.timeZone,
   });
-  const [monthName, _, year] = monthDateFormatter
+  const [monthName, literal, year] = monthDateFormatter
     .formatToParts(state.visibleRange.start.toDate(state.timeZone))
-    .map((part) => part.value);
+    .map((part) => {
+      return part.value
+    });
 
   return (
     <div className="flex items-center pb-4">
@@ -32,7 +34,7 @@ export function CalendarHeader({
         <h2>{calendarProps["aria-label"]}</h2>
       </VisuallyHidden>
       <h2 aria-hidden className="flex-1 align-center font-bold text-md text-gray-900">
-        {monthName} <span className="text-gray-500">{year}</span>
+        {monthName} <span className="text-gray-500">{year}</span> {literal}
       </h2>
       <Button {...prevButtonProps}>
         <ChevronLeftIcon className="size-4" />
