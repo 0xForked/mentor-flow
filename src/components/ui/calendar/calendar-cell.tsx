@@ -16,7 +16,11 @@ export function CalendarCell({
   currentMonth: CalendarDate;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const { cellProps, buttonProps, isSelected, isDisabled, isUnavailable, formattedDate } = useCalendarCell({ date }, state, ref);
+  const { cellProps, buttonProps, isSelected, isDisabled, isUnavailable, formattedDate } = useCalendarCell(
+    { date },
+    state,
+    ref,
+  );
   const isOutsideMonth = !isSameMonth(currentMonth, date);
   const isDateToday = isToday(date, getLocalTimeZone());
   const { focusProps, isFocusVisible } = useFocusRing();
@@ -33,7 +37,11 @@ export function CalendarCell({
           className={cn(
             "size-full rounded-md flex items-center justify-center",
             "text-gray-900 text-sm font-semibold",
-            isDisabled || isUnavailable ? (isDateToday ? "cursor-defaut" : "text-gray-400 cursor-defaut") : "cursor-pointer bg-gray-100",
+            isDisabled || isUnavailable
+              ? isDateToday
+                ? "cursor-defaut"
+                : "text-gray-400 cursor-defaut"
+              : "cursor-pointer bg-gray-100",
             isFocusVisible && "ring-1 group-focus:z-2 ring-gray-900 ring-offset-1",
             isSelected && "bg-gray-900 text-gray-50",
             !isSelected && !isDisabled && !isUnavailable && "hover:ring-2 hover:ring-gray-900",

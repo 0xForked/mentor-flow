@@ -4,18 +4,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { DateValue } from "@react-aria/calendar";
 import { useLocale } from "@react-aria/i18n";
 
-export function MentorCalendarRightSide({
+export function CalendarTimeSlots({
   date,
   timezone,
   weeksInMonth,
   handleAvailableTimeChange,
-  slots
+  slots,
 }: {
   date: DateValue;
   timezone: string;
   weeksInMonth: number;
   handleAvailableTimeChange: (time: string) => void;
-  slots: { "12": string; "24": string, "full": string }[];
+  slots: { "12": string; "24": string; full: string }[];
 }) {
   const { locale } = useLocale();
   const [dayNumber, dayName] = date
@@ -39,21 +39,21 @@ export function MentorCalendarRightSide({
       </div>
       {["12", "24"].map((time) => (
         <TabsContent key={time} value={time}>
-          <ScrollArea
-            type="always"
-            className="h-full"
-            style={{ maxHeight: weeksInMonth > 5 ? "380px" : "320px" }}
-          >
+          <ScrollArea type="always" className="h-full" style={{ maxHeight: weeksInMonth > 5 ? "380px" : "320px" }}>
             <div className="grid gap-2 pr-3">
-              {slots.length > 0 ? slots?.map((availableTime) => (
-                <Button
-                  variant="outline"
-                  onClick={() => handleAvailableTimeChange(availableTime["full"])}
-                  key={availableTime[time as "12" | "24"]}
-                >
-                  {availableTime[time as "12" | "24"]}
-                </Button>
-              )) : <p className="mx-auto">Slots currently not available</p>}
+              {slots.length > 0 ? (
+                slots?.map((availableTime) => (
+                  <Button
+                    variant="outline"
+                    onClick={() => handleAvailableTimeChange(availableTime["full"])}
+                    key={availableTime[time as "12" | "24"]}
+                  >
+                    {availableTime[time as "12" | "24"]}
+                  </Button>
+                ))
+              ) : (
+                <p className="mx-auto">Slots currently not available</p>
+              )}
             </div>
           </ScrollArea>
         </TabsContent>

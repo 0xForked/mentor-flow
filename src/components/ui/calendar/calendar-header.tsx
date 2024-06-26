@@ -25,7 +25,7 @@ export function CalendarHeader({
   const [monthName, literal, year] = monthDateFormatter
     .formatToParts(state.visibleRange.start.toDate(state.timeZone))
     .map((part) => {
-      return part.value
+      return part.value;
     });
 
   return (

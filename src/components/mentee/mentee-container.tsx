@@ -6,7 +6,7 @@ import { useQuery } from "react-query";
 import { MentorList } from "@/components/mentee/mentor-list";
 import { Button } from "@/components/ui/button";
 import { CircleX } from "lucide-react";
-import { MentorBookingDialog } from "./mentor-booking-dialog";
+import { MentorBookingDialog } from "./booking-dialog";
 
 export const MenteeContainer = () => {
   const { getMentors } = useAPI();
@@ -18,21 +18,20 @@ export const MenteeContainer = () => {
     retry: false,
   });
 
-  if (mentors.isLoading) {
-    return <>Loading . . .</>;
-  }
-
-  if (mentors.isError) {
+  if (mentors.isError || mentors.isLoading) {
     return (
       <main className="w-full">
-        <div className="flex flex-col">
-          <CircleX className="h-14 w-14 mx-auto" />
-          <h5 className="text-md font-semibold mx-auto mt-2">Error</h5>
-          <p className="text-sm font-light mx-auto mb-4 text-center">Something went wrong!</p>
-          <Button className="w-40 mx-auto" variant="link" onClick={() => mentors.refetch()}>
-            Retry
-          </Button>
-        </div>
+        {mentors.isError && (
+          <div className="flex flex-col">
+            <CircleX className="h-14 w-14 mx-auto" />
+            <h5 className="text-md font-semibold mx-auto mt-2">Error</h5>
+            <p className="text-sm font-light mx-auto mb-4 text-center">Something went wrong!</p>
+            <Button className="w-40 mx-auto" variant="link" onClick={() => mentors.refetch()}>
+              Retry
+            </Button>
+          </div>
+        )}
+        {mentors.isLoading && <p className="w-fit mx-auto">Loading . . .</p>}
       </main>
     );
   }
@@ -43,9 +42,7 @@ export const MenteeContainer = () => {
         <h5 className="text-lg font-semibold mx-auto mt-2">Available Mentors</h5>
         <p className="text-md font-light mx-auto mb-4 text-center">Find Your Mentor, Click to Schedule a Session!</p>
       </div>
-
       <MentorList />
-
       <MentorBookingDialog />
     </div>
   );

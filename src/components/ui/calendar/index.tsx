@@ -1,6 +1,6 @@
 "use client";
 
-import { createCalendar } from "@internationalized/date";
+import { GregorianCalendar } from "@internationalized/date";
 import { type CalendarProps, type DateValue, useCalendar } from "@react-aria/calendar";
 import { useLocale } from "@react-aria/i18n";
 import { useCalendarState } from "@react-stately/calendar";
@@ -9,6 +9,7 @@ import { CalendarHeader } from "./calendar-header";
 
 export function Calendar(props: CalendarProps<DateValue>) {
   const { locale } = useLocale();
+  const createCalendar = () => new GregorianCalendar();
   const state = useCalendarState({
     ...props,
     visibleDuration: { months: 1 },

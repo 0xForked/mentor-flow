@@ -60,6 +60,7 @@ export interface ProfileStatus {
 export interface MentorAvailabilitySlot {
   availability?: Availability | null;
   slots?: Slots | null;
+  interval?: number | null;
 }
 
 export interface Slots {

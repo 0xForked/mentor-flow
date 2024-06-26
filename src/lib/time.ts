@@ -6,6 +6,24 @@ export const intToDay = (numOfWeek: number): string => {
   return daysOfWeek[normalizedIndex];
 };
 
+export const intToMonth = (numberOfMonth: number): string => {
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+  return months[numberOfMonth];
+};
+
 export const intToTime = (timeInt: number): string => {
   if (!Number.isInteger(timeInt)) {
     return "";
@@ -29,6 +47,15 @@ export const addOneHour = (time: number): number => {
   }
   const newTime = newHours * 100 + newMinutes;
   return newTime;
+};
+
+export const addMinutes = (time: number, minutesToAdd: number): number => {
+  const hours = Math.floor(time / 100);
+  const minutes = time % 100;
+  const totalMinutes = hours * 60 + minutes + minutesToAdd;
+  const newHours = Math.floor(totalMinutes / 60) % 24;
+  const newMinutes = totalMinutes % 60;
+  return newHours * 100 + newMinutes;
 };
 
 export const strTimeToInt = (timeStr: string): number => {
@@ -87,15 +114,15 @@ export const getMonthEndTimes = (month: number, year: number) => {
   const lastDayCurrMonth = new Date(year, month, 0);
   const formatDate = (date: Date) => {
     const yyyy = date.getFullYear();
-    const mm = String(date.getMonth() + 1).padStart(2, '0');
-    const dd = String(date.getDate()).padStart(2, '0');
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const dd = String(date.getDate()).padStart(2, "0");
     return `${yyyy}-${mm}-${dd}`;
   };
   return {
     endOfPrevMonth: formatDate(lastDayPrevMonth),
-    endOfCurrMonth: formatDate(lastDayCurrMonth)
+    endOfCurrMonth: formatDate(lastDayCurrMonth),
   };
-}
+};
 
 export const convertToTimeFormats = (timeString: string) => {
   const date = new Date(timeString);
@@ -103,7 +130,7 @@ export const convertToTimeFormats = (timeString: string) => {
   const minutes = date.getUTCMinutes();
   const hours12 = hours24 % 12 || 12;
   const ampm = hours24 >= 12 ? "pm" : "am";
-  const time12 = `${hours12}:${minutes.toString().padStart(2, "0")}${ampm}`;
+  const time12 = `${hours12.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}${ampm}`;
   const time24 = `${hours24.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
-  return { "12": time12, "24": time24, "full": timeString };
-}
+  return { "12": time12, "24": time24, full: timeString };
+};
