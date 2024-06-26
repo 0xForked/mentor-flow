@@ -19,7 +19,7 @@ export function Calendar(props: CalendarProps<DateValue>) {
   const { calendarProps, prevButtonProps, nextButtonProps } = useCalendar(props, state);
 
   return (
-    <div {...calendarProps} className="inline-block text-gray-800 pt-4">
+    <div {...calendarProps} className="inline-block text-gray-700 pt-4">
       <CalendarHeader
         state={state}
         calendarProps={calendarProps}

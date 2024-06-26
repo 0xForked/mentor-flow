@@ -6,7 +6,7 @@ import { useQuery } from "react-query";
 import { MentorList } from "@/components/mentee/mentor-list";
 import { Button } from "@/components/ui/button";
 import { CircleX } from "lucide-react";
-import { MentorCalendarDialog } from "./mentor-calendar-dialog";
+import { MentorBookingDialog } from "./mentor-booking-dialog";
 
 export const MenteeContainer = () => {
   const { getMentors } = useAPI();
@@ -46,7 +46,7 @@ export const MenteeContainer = () => {
 
       <MentorList />
 
-      <MentorCalendarDialog />
+      <MentorBookingDialog />
     </div>
   );
 };

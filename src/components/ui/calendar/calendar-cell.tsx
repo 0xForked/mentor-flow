@@ -17,15 +17,12 @@ export function CalendarCell({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const { cellProps, buttonProps, isSelected, isDisabled, formattedDate } = useCalendarCell({ date }, state, ref);
-
   const isOutsideMonth = !isSameMonth(currentMonth, date);
-
   const isDateToday = isToday(date, getLocalTimeZone());
-
   const { focusProps, isFocusVisible } = useFocusRing();
 
   return (
-    <td {...cellProps} className={cn("py-0.5 relative px-0.5", isFocusVisible ? "z-10" : "z-0")}>
+    <td {...cellProps} className={cn("py-1 relative px-1", isFocusVisible ? "z-10" : "z-0")}>
       <div
         {...mergeProps(buttonProps, focusProps)}
         ref={ref}
@@ -35,19 +32,19 @@ export function CalendarCell({
         <div
           className={cn(
             "size-full rounded-md flex items-center justify-center",
-            "text-gray-12 text-sm font-semibold",
-            isDisabled ? (isDateToday ? "cursor-defaut" : "text-gray-8 cursor-defaut") : "cursor-pointer bg-gray-3",
-            isFocusVisible && "ring-1 group-focus:z-2 ring-gray-12 ring-offset-1",
-            isSelected && "bg-gray-12 text-gray-1",
-            !isSelected && !isDisabled && "hover:ring-2 hover:ring-gray-12",
+            "text-gray-900 text-sm font-semibold",
+            isDisabled ? (isDateToday ? "cursor-defaut" : "text-gray-700 cursor-defaut") : "cursor-pointer bg-gray-100",
+            isFocusVisible && "ring-1 group-focus:z-2 ring-gray-900 ring-offset-1",
+            isSelected && "bg-gray-900 text-gray-50",
+            !isSelected && !isDisabled && "hover:ring-2 hover:ring-gray-900",
           )}
         >
           {formattedDate}
           {isDateToday && (
             <div
               className={cn(
-                "absolute bottom-4 left-1/2 transform -translate-x-1/2 translate-y-1/2 size-1.5 bg-gray-12 rounded-full",
-                isSelected && "bg-gray-1",
+                "absolute bottom-4 left-1/2 transform -translate-x-1/2 translate-y-1/2 size-1 bg-gray-900 rounded-full",
+                isSelected && "bg-gray-50",
               )}
             />
           )}

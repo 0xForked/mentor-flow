@@ -16,7 +16,6 @@ export function CalendarGrid({ state, offset = {} }: { state: CalendarState; off
     },
     state,
   );
-
   const weeksInMonth = getWeeksInMonth(startDate, locale);
 
   return (
@@ -24,7 +23,7 @@ export function CalendarGrid({ state, offset = {} }: { state: CalendarState; off
       <thead {...headerProps}>
         <tr>
           {weekDays.map((day, index) => (
-            <th key={index} className="uppercase text-xs text-gray-11 pb-4">
+            <th key={index} className="uppercase text-xs text-gray-900 pb-4">
               {day}
             </th>
           ))}
@@ -37,7 +36,6 @@ export function CalendarGrid({ state, offset = {} }: { state: CalendarState; off
               if (!date) {
                 return <td key={index} />;
               }
-
               return <CalendarCell key={index} state={state} date={date} currentMonth={startDate} />;
             })}
           </tr>

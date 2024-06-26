@@ -44,11 +44,12 @@ export function MentorCalendarRightSide({
       day: "numeric",
     })
     .split(" ");
+
   return (
     <Tabs defaultValue="12" className="flex flex-col gap-4 w-[280px] border-l pl-6 pt-4">
       <div className="flex justify-between items-center">
-        <p aria-hidden className="flex-1 align-center font-bold text-md text-gray-12">
-          {dayName} <span className="text-gray-11">{dayNumber}</span>
+        <p aria-hidden className="flex-1 align-center font-bold text-md text-gray-900">
+          {dayName} <span className="text-gray-500">{dayNumber}</span>
         </p>
         <TabsList className="grid w-fit grid-cols-2">
           <TabsTrigger value="12">12h</TabsTrigger>

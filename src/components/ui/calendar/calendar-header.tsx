@@ -22,7 +22,6 @@ export function CalendarHeader({
     year: "numeric",
     timeZone: state.timeZone,
   });
-
   const [monthName, _, year] = monthDateFormatter
     .formatToParts(state.visibleRange.start.toDate(state.timeZone))
     .map((part) => part.value);
@@ -32,9 +31,8 @@ export function CalendarHeader({
       <VisuallyHidden>
         <h2>{calendarProps["aria-label"]}</h2>
       </VisuallyHidden>
-      {/* biome-ignore lint/a11y/useHeadingContent: <explanation> */}
-      <h2 aria-hidden className="flex-1 align-center font-bold text-md text-gray-12">
-        {monthName} <span className="text-gray-11">{year}</span>
+      <h2 aria-hidden className="flex-1 align-center font-bold text-md text-gray-900">
+        {monthName} <span className="text-gray-500">{year}</span>
       </h2>
       <Button {...prevButtonProps}>
         <ChevronLeftIcon className="size-4" />

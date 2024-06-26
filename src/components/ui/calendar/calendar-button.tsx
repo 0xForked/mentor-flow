@@ -14,14 +14,15 @@ export function Button(
   const ref = useRef<HTMLButtonElement>(null);
   const { buttonProps } = useButton(props, ref);
   const { focusProps, isFocusVisible } = useFocusRing();
+
   return (
     <button
       {...mergeProps(buttonProps, focusProps)}
       ref={ref}
       className={cn(
-        "p-2 rounded-lg outline-none text-gray-12",
-        props.isDisabled ? "text-gray-7" : "hover:bg-gray-4 active:bg-gray-5",
-        isFocusVisible && "ring-2 ring-offset-2 ring-gray-9",
+        "p-2 rounded-lg outline-none text-gray-900",
+        props.isDisabled ? "text-gray-500" : "hover:bg-gray-300 active:bg-gray-400",
+        isFocusVisible && "ring-2 ring-offset-2 ring-gray-800",
       )}
     >
       {props.children}
