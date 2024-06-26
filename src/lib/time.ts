@@ -1,4 +1,5 @@
 import { AvailabilityDay } from "./user";
+import { parseAbsoluteToLocal } from "@internationalized/date";
 
 export const intToDay = (numOfWeek: number): string => {
   const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -124,13 +125,43 @@ export const getMonthEndTimes = (month: number, year: number) => {
   };
 };
 
-export const convertToTimeFormats = (timeString: string) => {
-  const date = new Date(timeString);
-  const hours24 = date.getUTCHours();
-  const minutes = date.getUTCMinutes();
-  const hours12 = hours24 % 12 || 12;
-  const ampm = hours24 >= 12 ? "pm" : "am";
-  const time12 = `${hours12.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}${ampm}`;
-  const time24 = `${hours24.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
-  return { "12": time12, "24": time24, full: timeString };
+export const convertToLocalTimeFormats = (isoTimeString: string) => {
+  const zonedDateTime = parseAbsoluteToLocal(isoTimeString);
+  return {
+    "12": new Intl.DateTimeFormat([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    }).format(zonedDateTime.toDate()),
+    "24": new Intl.DateTimeFormat([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }).format(zonedDateTime.toDate()),
+    full: isoTimeString,
+  };
+};
+
+export const convertToLocalDateTimeRangeFormats = (isoString: string, interval: number) => {
+  const zonedDateTime = parseAbsoluteToLocal(isoString);
+  const addInterval = zonedDateTime.add({ minutes: interval });
+  const dateFormatter = new Intl.DateTimeFormat([], {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+  const timeFormatter = new Intl.DateTimeFormat([], {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+  const date = dateFormatter.format(zonedDateTime.toDate());
+  const startTime = timeFormatter.format(zonedDateTime.toDate());
+  const endTime = timeFormatter.format(addInterval.toDate());
+  return {
+    date,
+    startTime,
+    endTime,
+  };
 };

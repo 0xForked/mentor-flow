@@ -4,7 +4,7 @@ import { timezoneReference } from "@/lib/reference";
 import { Clock4, Calendar, Globe, MapPin } from "lucide-react";
 import { InstalledApp, User } from "@/lib/user";
 import { capitalizeFirstChar } from "@/lib/utils";
-import { addMinutes, intToTime, strTimeToInt } from "@/lib/time";
+import { convertToLocalDateTimeRangeFormats } from "@/lib/time";
 
 export function CalendarMentorProfile({
   timezone,
@@ -21,26 +21,13 @@ export function CalendarMentorProfile({
   interval: number;
   time: string | null;
 }) {
-  const formatTimeSlot = (isoString: string, interval: number): JSX.Element => {
-    const zonedDateTime = new Date(isoString);
-    const optionsDate: Intl.DateTimeFormatOptions = {
-      weekday: "long",
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-    };
-    const formattedDate = zonedDateTime.toLocaleDateString("en-US", optionsDate);
-    const hours24 = zonedDateTime.getUTCHours();
-    const minutes = zonedDateTime.getUTCMinutes();
-    const hours12 = hours24 % 12 || 12;
-    const ampm = hours24 >= 12 ? "pm" : "am";
-    const formattedStartTime = `${hours12.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}${ampm}`;
-    const formattedEndTime = intToTime(addMinutes(strTimeToInt(formattedStartTime), interval));
+  const formatTimeSlot = (ISOTime: string, interval: number): JSX.Element => {
+    const { date, startTime, endTime } = convertToLocalDateTimeRangeFormats(ISOTime, interval);
     return (
       <>
-        <span>{formattedDate}</span> <br />
+        <span>{date}</span> <br />
         <span>
-          {formattedStartTime} – {formattedEndTime}
+          {startTime} – {endTime}
         </span>
       </>
     );

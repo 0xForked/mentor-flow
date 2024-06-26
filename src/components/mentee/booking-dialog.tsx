@@ -13,7 +13,7 @@ import { useMutation } from "react-query";
 import { handleError } from "@/lib/http";
 import { useAPI } from "@/hooks/useApi";
 import { Slots } from "@/lib/user";
-import { convertToTimeFormats, getMonthEndTimes } from "@/lib/time";
+import { convertToLocalTimeFormats, getMonthEndTimes } from "@/lib/time";
 import { CalendarBookingForm } from "./calendar-booking-form";
 
 export const MentorBookingDialog = () => {
@@ -85,7 +85,7 @@ export const MentorBookingDialog = () => {
     const selectedDateStr = formatDate(newDate);
     const data: Slots | null | undefined = availabilitySlots?.slots;
     if (data && data[selectedDateStr]) {
-      setSlots(data[selectedDateStr].map((entry) => convertToTimeFormats(entry.time)));
+      setSlots(data[selectedDateStr].map((entry) => convertToLocalTimeFormats(entry.time)));
     } else {
       setSlots([]);
     }
