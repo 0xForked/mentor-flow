@@ -19,14 +19,11 @@ interface Actions {
 export const useUserMenteeStore = create<States & Actions>((set, get) => {
   const updateBlockDays = () => {
     const { availabilitySlots } = get();
-    // get block days by index of the week
     const days = availabilitySlots?.availability?.days;
     const filteredBlockDays = days?.filter((item) => !item.enabled);
     const blockDays = filteredBlockDays?.map((item) => item.day) || [];
-    // get available dates by generated slots
     const daySlosts = availabilitySlots?.slots ?? {};
     const availableDates = Object.keys(daySlosts);
-
     set({ blockDays, availableDates });
   };
 

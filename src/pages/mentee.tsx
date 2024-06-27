@@ -31,7 +31,7 @@ export const MenteePage = () => {
   if (!menteeJWTValue) {
     return (
       <div className="flex w-1/2 justify-center mx-auto mb-32">
-        <JWTForm callback={onJWTUpdated} />{" "}
+        <JWTForm callback={onJWTUpdated} />
       </div>
     );
   }
