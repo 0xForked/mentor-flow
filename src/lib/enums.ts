@@ -12,4 +12,8 @@ export enum GlobalStateKey {
   DisplayNoAvailabilityModal = "display_no_availability_modal",
   UpdateAvailabilityData = "update_availability_data",
   MentorCalendarDialog = "mentor_calendar_dialog",
+  // FOR BOOKING DIALOG INITIALIZATION
+  CurrentDate = "current_date",
+  StartRangeDate = "start_range_date",
+  EndRangeDate = "end_range_date"
 }

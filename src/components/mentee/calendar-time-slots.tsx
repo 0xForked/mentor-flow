@@ -8,13 +8,13 @@ export function CalendarTimeSlots({
   date,
   timezone,
   weeksInMonth,
-  handleAvailableTimeChange,
+  setSelectedTime,
   slots,
 }: {
   date: DateValue;
   timezone: string;
   weeksInMonth: number;
-  handleAvailableTimeChange: (time: string) => void;
+  setSelectedTime: (time: string) => void;
   slots: { "12": string; "24": string; full: string }[];
 }) {
   const { locale } = useLocale();
@@ -45,14 +45,14 @@ export function CalendarTimeSlots({
                 slots?.map((availableTime) => (
                   <Button
                     variant="outline"
-                    onClick={() => handleAvailableTimeChange(availableTime["full"])}
+                    onClick={() => setSelectedTime(availableTime["full"])}
                     key={availableTime[time as "12" | "24"]}
                   >
                     {availableTime[time as "12" | "24"]}
                   </Button>
                 ))
               ) : (
-                <p className="mx-auto">Slots currently not available</p>
+                <p className="mx-auto">Please select a date to view available slots.</p>
               )}
             </div>
           </ScrollArea>

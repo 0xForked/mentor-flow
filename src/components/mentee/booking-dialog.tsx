@@ -48,7 +48,7 @@ export const MentorBookingDialog = () => {
 
   useEffect(() => {
     setOpen(states[GlobalStateKey.MentorCalendarDialog]);
-    if (open && focusedDate) {
+    if (open && !availabilitySlots && focusedDate) {
       const { endOfPrevMonth, endOfCurrMonth } = getMonthEndTimes(focusedDate.month, focusedDate.year);
       getAvailabilitySlots(endOfPrevMonth, endOfCurrMonth);
       generateSlot(focusedDate);
@@ -57,21 +57,12 @@ export const MentorBookingDialog = () => {
       onMonthChange(focusedDate);
       generateSlot(focusedDate);
     }
-  }, [open, states, focusedDate, currentMonth]);
+  }, [open, states, focusedDate, currentMonth, availabilitySlots]);
 
   const handleDateChange = (date: DateValue) => {
     const newDate = date as CalendarDate;
     setDate(newDate);
     generateSlot(newDate);
-  };
-
-  const handleAvailableTimeChange = (time: string) => {
-    console.log(time);
-    setSelectedTime(time);
-  };
-
-  const handleFocusChange = (selectedDate: DateValue) => {
-    setFocusedDate(selectedDate as CalendarDate);
   };
 
   const onMonthChange = (newDate: DateValue) => {
@@ -138,13 +129,11 @@ export const MentorBookingDialog = () => {
                 <>
                   <Calendar
                     minValue={today(getLocalTimeZone())}
-                    defaultValue={today(getLocalTimeZone())}
-                    value={date}
                     onChange={handleDateChange}
-                    onFocusChange={(focused) => handleFocusChange(focused)}
+                    onFocusChange={(focused) => setFocusedDate(focused)}
                     isDateUnavailable={isDateUnavailable}
                   />
-                  <CalendarTimeSlots {...{ date, timezone, weeksInMonth, handleAvailableTimeChange, slots }} />
+                  <CalendarTimeSlots {...{ date, timezone, weeksInMonth, setSelectedTime, slots }} />
                 </>
               ) : (
                 <CalendarBookingForm back={() => setSelectedTime(null)} />
