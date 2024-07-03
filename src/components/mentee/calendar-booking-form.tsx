@@ -20,11 +20,11 @@ export const CalendarBookingForm = ({
   tz,
   dt,
 }: {
-  cb: () => void,
-  back: () => void,
-  id?: string,
-  tz?: string,
-  dt?: string,
+  cb: () => void;
+  back: () => void;
+  id?: string;
+  tz?: string;
+  dt?: string;
 }) => {
   const form = useForm<z.infer<typeof BookingFormSchema>>({
     resolver: zodResolver(BookingFormSchema),
@@ -33,20 +33,21 @@ export const CalendarBookingForm = ({
 
   const createBooking = useMutation(createNewBooking, {
     onSuccess: (resp) => {
-      console.log(resp)
-      setTimeout(() => cb(), 1000)
+      console.log(resp);
+      setTimeout(() => cb(), 1000);
     },
     onError: (error) => handleError(error),
   });
 
-
   function onSubmit(data: z.infer<typeof BookingFormSchema>) {
-    createBooking.mutate(JSON.stringify({
-      mentor_id: id,
-      timezone: tz,
-      booking_time: dt,
-      booking_notes: data.notes,
-    }));
+    createBooking.mutate(
+      JSON.stringify({
+        mentor_id: id,
+        timezone: tz,
+        booking_time: dt,
+        booking_notes: data.notes,
+      }),
+    );
   }
 
   return (
@@ -74,8 +75,8 @@ export const CalendarBookingForm = ({
             <Button variant="ghost" type="button" onClick={() => back()}>
               Back
             </Button>
-            <Button type="submit" disabled={form.formState.isSubmitted}>
-              {form.formState.isSubmitted && <Loader2 className="w-4 animate-spin mr-1" />}
+            <Button type="submit" disabled={createBooking.isLoading}>
+              {createBooking.isLoading && <Loader2 className="w-4 animate-spin mr-1" />}
               Continue
             </Button>
           </div>

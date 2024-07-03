@@ -19,8 +19,7 @@ import { CalendarBookingForm } from "./calendar-booking-form";
 export const MentorBookingDialog = () => {
   const [open, setOpen] = useState(false);
   const { states, setState } = useGlobalStateStore();
-  const { selectedMentor, setSelectedMentor, setAvailabilitySlots, availabilitySlots, blockDays, availableDates } =
-    useUserMenteeStore();
+  const { selectedMentor, setSelectedMentor, setAvailabilitySlots, availabilitySlots, blockDays, availableDates } = useUserMenteeStore();
   const { getMentorAvailbilitySlots } = useAPI();
   const { locale } = useLocale();
   const [date, setDate] = useState(today(getLocalTimeZone()));
@@ -100,6 +99,7 @@ export const MentorBookingDialog = () => {
     setOpen(!open);
     setSelectedMentor(null);
     setAvailabilitySlots(null);
+    setSelectedTime(null);
     setState(GlobalStateKey.MentorCalendarDialog, false);
   };
 
@@ -108,9 +108,7 @@ export const MentorBookingDialog = () => {
       <DialogContent className="max-w-max w-10/12 divide-y-2 gap-4">
         <DialogHeader>
           <DialogTitle>Mentor Availability Slots </DialogTitle>
-          <DialogDescription>
-            Set your preferred date and time for a session with @{selectedMentor?.username}.
-          </DialogDescription>
+          <DialogDescription>Set your preferred date and time for a session with @{selectedMentor?.username}.</DialogDescription>
         </DialogHeader>
         <div className="max-w-full w-full">
           {mentorAvailability.isLoading && !availabilitySlots ? (
