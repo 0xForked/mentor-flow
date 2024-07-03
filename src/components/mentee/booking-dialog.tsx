@@ -136,7 +136,13 @@ export const MentorBookingDialog = () => {
                   <CalendarTimeSlots {...{ date, timezone, weeksInMonth, setSelectedTime, slots }} />
                 </>
               ) : (
-                <CalendarBookingForm back={() => setSelectedTime(null)} />
+                <CalendarBookingForm
+                  id={selectedMentor?.id}
+                  tz={timezone}
+                  dt={selectedTime}
+                  cb={() => onOpenStateChange()}
+                  back={() => setSelectedTime(null)}
+                />
               )}
             </div>
           )}

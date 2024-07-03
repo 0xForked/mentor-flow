@@ -1,22 +1,52 @@
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
+import { useAPI } from "@/hooks/useApi";
+import { handleError } from "@/lib/http";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { useMutation } from "react-query";
 import { z } from "zod";
 
 const BookingFormSchema = z.object({
   notes: z.string(),
 });
 
-export const CalendarBookingForm = ({ back }: { back: () => void }) => {
+export const CalendarBookingForm = ({
+  cb,
+  back,
+  id,
+  tz,
+  dt,
+}: {
+  cb: () => void,
+  back: () => void,
+  id?: string,
+  tz?: string,
+  dt?: string,
+}) => {
   const form = useForm<z.infer<typeof BookingFormSchema>>({
     resolver: zodResolver(BookingFormSchema),
   });
+  const { createNewBooking } = useAPI();
+
+  const createBooking = useMutation(createNewBooking, {
+    onSuccess: (resp) => {
+      console.log(resp)
+      setTimeout(() => cb(), 1000)
+    },
+    onError: (error) => handleError(error),
+  });
+
 
   function onSubmit(data: z.infer<typeof BookingFormSchema>) {
-    setTimeout(() => console.log(data), 500);
+    createBooking.mutate(JSON.stringify({
+      mentor_id: id,
+      timezone: tz,
+      booking_time: dt,
+      booking_notes: data.notes,
+    }));
   }
 
   return (
@@ -44,8 +74,8 @@ export const CalendarBookingForm = ({ back }: { back: () => void }) => {
             <Button variant="ghost" type="button" onClick={() => back()}>
               Back
             </Button>
-            <Button type="submit" disabled={form.formState.isSubmitSuccessful}>
-              {form.formState.isSubmitSuccessful && <Loader2 className="w-4 animate-spin mr-1" />}
+            <Button type="submit" disabled={form.formState.isSubmitted}>
+              {form.formState.isSubmitted && <Loader2 className="w-4 animate-spin mr-1" />}
               Continue
             </Button>
           </div>

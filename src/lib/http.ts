@@ -13,6 +13,7 @@ export const API_PATH = {
   MENTOR: `${API_URL}/v2/community-members?profile_type=mentor`,
   MENTOR_AVAILABILITY_SLOT: (userId: string, timezone: string, dateRange: string) =>
     `${API_URL}/v1/mentor-schedules/${userId}/availabilities?timezone=${timezone}&date_range=${dateRange}`,
+  BOOKING: `${API_URL}/v1/mentor-schedules/booking`,
 };
 
 export interface HttpResponse<T> {

@@ -1,6 +1,6 @@
 import { OAuthProvider } from "@/lib/enums";
 import { API_PATH, HttpResponse, HttpResponseList } from "@/lib/http";
-import { Availability, MentorAvailabilitySlot, User } from "@/lib/user";
+import { Availability, Booking, MentorAvailabilitySlot, User } from "@/lib/user";
 import { useMentorJWTStore } from "@/stores/mentorJWT";
 import { useMenteeJWTStore } from "@/stores/menteeJWT";
 
@@ -175,6 +175,27 @@ export function useAPI() {
     return await response.json();
   };
 
+  const createNewBooking = async (body: string): Promise<HttpResponse<Booking>> => {
+    const response = await fetch(API_PATH.BOOKING, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${menteeJWTValue}`,
+      },
+      credentials: "include",
+      body,
+    });
+
+    if (!response.ok) {
+      if (response.statusText.includes("Unauthorized")) {
+        clearMentorJWT();
+      }
+      throw new Error(`Failed to create availability: ${response.statusText}`);
+    }
+
+    return await response.json();
+  };
+
   return {
     getProfile,
     getAvailability,
@@ -184,5 +205,6 @@ export function useAPI() {
     createNewOAuthConnectUrl,
     getMentors,
     getMentorAvailbilitySlots,
+    createNewBooking
   };
 }

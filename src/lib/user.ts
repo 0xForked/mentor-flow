@@ -70,3 +70,8 @@ export interface Slots {
 export interface SlotTime {
   time: string;
 }
+
+
+export interface Booking {
+  id: string;
+}
