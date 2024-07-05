@@ -1,6 +1,7 @@
 export interface User {
   id: string;
   nick_name?: string;
+  name?: string;
   email?: string;
   avatar?: string;
   full_name?: string;
@@ -71,7 +72,12 @@ export interface SlotTime {
   time: string;
 }
 
-
 export interface Booking {
   id: string;
+  mentor_data: User;
+  mentee_data: User;
+  datetime_string: string;
+  session_interval: number;
+  summary: string;
+  description: string;
 }

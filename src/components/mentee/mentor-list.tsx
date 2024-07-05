@@ -23,10 +23,7 @@ export const MentorList = () => {
             key={mentor.id}
             onClick={() => onMentorSelected(mentor)}
           >
-            <div
-              className="relative overflow-hidden mb-12 hover-grayscale-0 wow fadeInUp mentor-list"
-              data-wow-duration="1s"
-            >
+            <div className="relative overflow-hidden mb-12 hover-grayscale-0 wow fadeInUp mentor-list" data-wow-duration="1s">
               <div className="relative overflow-hidden px-6">
                 <img
                   src={mentor.avatar}

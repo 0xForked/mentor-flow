@@ -14,6 +14,7 @@ export const API_PATH = {
   MENTOR_AVAILABILITY_SLOT: (userId: string, timezone: string, dateRange: string) =>
     `${API_URL}/v1/mentor-schedules/${userId}/availabilities?timezone=${timezone}&date_range=${dateRange}`,
   BOOKING: `${API_URL}/v1/mentor-schedules/booking`,
+  MENTEE_BOOKING: `${API_URL}/v1/mentor-schedules/my-bookings`,
 };
 
 export interface HttpResponse<T> {

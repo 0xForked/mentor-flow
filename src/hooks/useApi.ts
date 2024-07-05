@@ -196,6 +196,26 @@ export function useAPI() {
     return await response.json();
   };
 
+  const getMenteeSchedules = async (): Promise<HttpResponse<HttpResponseList<Booking>>> => {
+    const response = await fetch(`${API_PATH.MENTEE_BOOKING}?limit=3`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${menteeJWTValue}`,
+      },
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      if (response.statusText.includes("Unauthorized")) {
+        clearMenteeJWT();
+      }
+      throw new Error(`Failed to fetch mentor lists: ${response.statusText}`);
+    }
+
+    return await response.json();
+  };
+
   return {
     getProfile,
     getAvailability,
@@ -205,6 +225,7 @@ export function useAPI() {
     createNewOAuthConnectUrl,
     getMentors,
     getMentorAvailbilitySlots,
-    createNewBooking
+    createNewBooking,
+    getMenteeSchedules,
   };
 }

@@ -1,4 +1,4 @@
-import { MentorAvailabilitySlot, User } from "@/lib/user";
+import { Booking, MentorAvailabilitySlot, User } from "@/lib/user";
 import { create } from "zustand";
 
 interface States {
@@ -7,6 +7,7 @@ interface States {
   mentors: User[] | null;
   selectedMentor: User | null;
   availabilitySlots: MentorAvailabilitySlot | null;
+  selectedSchedule: Booking | null;
 }
 
 interface Actions {
@@ -14,6 +15,7 @@ interface Actions {
   setSelectedMentor: (selectedMentor: User | null) => void;
   setAvailabilitySlots: (availabilitySlots: MentorAvailabilitySlot | null) => void;
   cleanMenteeState: () => void;
+  setSelectedSchedule: (selectedSchedule: Booking | null) => void;
 }
 
 export const useUserMenteeStore = create<States & Actions>((set, get) => {
@@ -33,6 +35,7 @@ export const useUserMenteeStore = create<States & Actions>((set, get) => {
     mentors: null,
     selectedMentor: null,
     availabilitySlots: null,
+    selectedSchedule: null,
     setMentors: (mentors: User[] | null) => set({ mentors }),
     setSelectedMentor: (selectedMentor: User | null) => set({ selectedMentor }),
     setAvailabilitySlots: (availabilitySlots: MentorAvailabilitySlot | null) => {
@@ -47,5 +50,6 @@ export const useUserMenteeStore = create<States & Actions>((set, get) => {
         selectedMentor: null,
         availabilitySlots: null,
       }),
+    setSelectedSchedule: (selectedSchedule: Booking | null) => set({ selectedSchedule }),
   };
 });
