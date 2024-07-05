@@ -25,6 +25,7 @@ export function BookingDetailsSheet() {
   );
 
   const handleClose = () => {
+    setOpen(false);
     setSelectedSchedule(null);
     setState(GlobalStateKey.DisplayMenteeBookingDetail, false);
   };
