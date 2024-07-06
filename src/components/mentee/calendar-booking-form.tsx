@@ -8,6 +8,8 @@ import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useMutation } from "react-query";
 import { z } from "zod";
+import { useQueryClient } from 'react-query'
+import { toast } from "sonner";
 
 const BookingFormSchema = z.object({
   notes: z.string(),
@@ -30,11 +32,13 @@ export const CalendarBookingForm = ({
     resolver: zodResolver(BookingFormSchema),
   });
   const { createNewBooking } = useAPI();
+  const queryClient = useQueryClient()
 
   const createBooking = useMutation(createNewBooking, {
-    onSuccess: (resp) => {
-      console.log(resp);
-      setTimeout(() => cb(), 1000);
+    onSuccess: () => {
+      toast.dismiss();
+      queryClient.invalidateQueries('bookings')
+      cb();
     },
     onError: (error) => handleError(error),
   });

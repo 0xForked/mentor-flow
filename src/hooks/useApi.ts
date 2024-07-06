@@ -197,7 +197,7 @@ export function useAPI() {
   };
 
   const getMenteeSchedules = async (): Promise<HttpResponse<HttpResponseList<Booking>>> => {
-    const response = await fetch(`${API_PATH.MENTEE_BOOKING}?limit=3`, {
+    const response = await fetch(`${API_PATH.MENTEE_SCHEDULES}?limit=3`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -216,6 +216,28 @@ export function useAPI() {
     return await response.json();
   };
 
+  const requestCancelBooking = async (p: { id: string; body: string; }): Promise<HttpResponse<string>> => {
+    const body = p.body;
+    const response = await fetch(API_PATH.CANCEL_BOOKING(p.id), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${menteeJWTValue}`,
+      },
+      credentials: "include",
+      body,
+    });
+
+    if (!response.ok) {
+      if (response.statusText.includes("Unauthorized")) {
+        clearMentorJWT();
+      }
+      throw new Error(`Failed to cancel booking: ${response.statusText}`);
+    }
+
+    return { data: "" } as HttpResponse<string>;
+  };
+
   return {
     getProfile,
     getAvailability,
@@ -227,5 +249,6 @@ export function useAPI() {
     getMentorAvailbilitySlots,
     createNewBooking,
     getMenteeSchedules,
+    requestCancelBooking
   };
 }

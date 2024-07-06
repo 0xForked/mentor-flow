@@ -56,6 +56,7 @@ export const MentorBookingDialog = () => {
       onMonthChange(focusedDate);
       generateSlot(focusedDate);
     }
+    // skip other deps('generateSlot', 'getAvailabilitySlots', and 'onMonthChange'.) to avoid unlimited api call
   }, [open, states, focusedDate, currentMonth, availabilitySlots]);
 
   const handleDateChange = (date: DateValue) => {

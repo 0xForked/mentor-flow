@@ -80,4 +80,6 @@ export interface Booking {
   session_interval: number;
   summary: string;
   description: string;
+  meeting_url: string;
+  additional_notes: string;
 }

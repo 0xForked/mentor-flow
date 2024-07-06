@@ -15,7 +15,7 @@ export enum GlobalStateKey {
   // FOR BOOKING DIALOG INITIALIZATION
   CurrentDate = "current_date",
   StartRangeDate = "start_range_date",
-  EndRangeDate = "end_range_date"
+  EndRangeDate = "end_range_date",
   // FOR BOOKING SHEET
   DisplayMenteeBookingDetail = "display_mentee_booking_detail"
 }
