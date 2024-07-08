@@ -238,6 +238,28 @@ export function useAPI() {
     return { data: "" } as HttpResponse<string>;
   };
 
+  const requestRescheduleBooking = async (p: { id: string; body: string; }): Promise<HttpResponse<string>> => {
+    const body = p.body;
+    const response = await fetch(API_PATH.RESCHEDULE_BOOKING(p.id), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${menteeJWTValue}`,
+      },
+      credentials: "include",
+      body,
+    });
+
+    if (!response.ok) {
+      if (response.statusText.includes("Unauthorized")) {
+        clearMentorJWT();
+      }
+      throw new Error(`Failed to cancel booking: ${response.statusText}`);
+    }
+
+    return { data: "" } as HttpResponse<string>;
+  };
+
   return {
     getProfile,
     getAvailability,
@@ -249,6 +271,7 @@ export function useAPI() {
     getMentorAvailbilitySlots,
     createNewBooking,
     getMenteeSchedules,
-    requestCancelBooking
+    requestCancelBooking,
+    requestRescheduleBooking
   };
 }

@@ -18,10 +18,8 @@ export function BookingDetailsSheet() {
   const queryClient = useQueryClient()
 
   useEffect(() => {
-    if (selectedSchedule && states[GlobalStateKey.DisplayMenteeBookingDetail]) {
-      setOpen(true);
-    }
-  }, [selectedSchedule, states]);
+    setOpen(states[GlobalStateKey.DisplayMenteeBookingDetail]);
+  }, [states]);
 
   if (!selectedSchedule) return;
 
@@ -41,6 +39,8 @@ export function BookingDetailsSheet() {
     queryClient.invalidateQueries('bookings');
     handleClose();
   }
+
+  const handleReschedule = () => setState(GlobalStateKey.RescheduleCalendarDialog, true);
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>
@@ -85,7 +85,7 @@ export function BookingDetailsSheet() {
           </div>}
           {!displayCancelForm && <div className="flex justify-between mt-8">
             <Button variant="destructive" onClick={() => setDisplayCancelForm(true)}>Request Cancel</Button>
-            <Button onClick={console.log}>Reschedule</Button >
+            <Button onClick={handleReschedule}>Reschedule</Button >
           </div>}
         </div>
       </SheetContent>

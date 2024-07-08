@@ -12,6 +12,7 @@ import { convertToLocalDateTimeRangeFormats } from "@/lib/time";
 import { useGlobalStateStore } from "@/stores/state";
 import { GlobalStateKey } from "@/lib/enums";
 import { BookingDetailsSheet } from "./booking-detail-sheet";
+import { RescheduleBookingDialog } from "./reschedule-dialog";
 
 export const MenteeContainer = () => {
   const { getMentors, getMenteeSchedules } = useAPI();
@@ -83,6 +84,7 @@ export const MenteeContainer = () => {
       <MentorList />
       <MentorBookingDialog />
       <BookingDetailsSheet />
+      <RescheduleBookingDialog />
     </div>
   );
 };
