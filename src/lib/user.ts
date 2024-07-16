@@ -17,6 +17,7 @@ export interface Availability {
   connected_with_google: boolean;
   connected_with_microsoft: boolean;
   days?: AvailabilityDay[] | null;
+  day_overrides?: AvailabilityDayOverride[] | null;
   installed_apps?: InstalledApp | null;
 }
 
@@ -27,6 +28,12 @@ export interface AvailabilityDay {
   start_time: number;
   end_time: number;
   extend_times?: ExtendTime[] | null;
+}
+
+export interface AvailabilityDayOverride {
+  id: string;
+  start_date: string;
+  end_date: string;
 }
 
 export interface ExtendTime {

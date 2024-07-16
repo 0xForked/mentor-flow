@@ -111,6 +111,27 @@ export function useAPI() {
     return { data: "" } as HttpResponse<string>;
   };
 
+  const deleteAvailabilityDayOverride = async (p: { dayId: string }): Promise<HttpResponse<string>> => {
+    const response = await fetch(API_PATH.AVAILABILITY_DATE_OVERRIDE(p.dayId), {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${mentorJWTValue}`,
+      },
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      if (response.statusText.includes("Unauthorized")) {
+        clearMentorJWT();
+      }
+      throw new Error(`Failed to delete extend time: ${response.statusText}`);
+    }
+
+    // avoid get error cause by NoContent respond
+    return { data: "" } as HttpResponse<string>;
+  };
+
   const createNewOAuthConnectUrl = async (provider: OAuthProvider): Promise<HttpResponse<string>> => {
     const response = await fetch(API_PATH.OAUTH_WEB_CONNECT(provider), {
       method: "POST",
@@ -266,6 +287,7 @@ export function useAPI() {
     createNewAvailability,
     updateAvailability,
     deleteAvailabilityExtendTime,
+    deleteAvailabilityDayOverride,
     createNewOAuthConnectUrl,
     getMentors,
     getMentorAvailbilitySlots,

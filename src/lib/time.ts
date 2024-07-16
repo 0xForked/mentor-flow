@@ -165,3 +165,35 @@ export const convertToLocalDateTimeRangeFormats = (isoString: string, interval: 
     endTime,
   };
 };
+
+export const convertToLocalOverideDayFormats = (startISOString: string, endISOString: string) => {
+  const startDateTime = parseAbsoluteToLocal(startISOString);
+  const endDateTime = parseAbsoluteToLocal(endISOString);
+  const dateFormatter = new Intl.DateTimeFormat([], {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+  const timeFormatter = new Intl.DateTimeFormat([], {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+  const date = dateFormatter.format(startDateTime.toDate());
+  const startTime = timeFormatter.format(startDateTime.toDate());
+  const endTime = timeFormatter.format(endDateTime.toDate());
+  return {
+    date,
+    startTime,
+    endTime,
+  };
+};
+
+export const replaceTimeInDate = (date: Date, timeInt: number) => {
+  const hours = Math.floor(timeInt / 100);
+  const minutes = timeInt % 100;
+  const newDate = new Date(date);
+  newDate.setHours(hours, minutes, 0, 0);
+  return newDate;
+}

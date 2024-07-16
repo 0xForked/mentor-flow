@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { useLocale } from "@react-aria/i18n";
 import { type CalendarDate, getLocalTimeZone, getWeeksInMonth, today } from "@internationalized/date";
 import type { DateValue } from "@react-aria/calendar";
-import { Calendar } from "@/components/ui/calendar";
+import { Calendar } from "@/components/ui/aria-calendar";
 import { CalendarMentorProfile } from "./calendar-mentor-profile";
 import { CalendarTimeSlots } from "./calendar-time-slots";
 import { useMutation } from "react-query";

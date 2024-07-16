@@ -8,6 +8,8 @@ export const API_PATH = {
   AVAILABILITY: `${API_URL}/v1/mentor-settings/availabilities`,
   AVAILABILITY_EXTEND_TIME: (dayId: string, timeId: string) =>
     `${API_URL}/v1/mentor-settings/availabilities/days/${dayId}/extend-times/${timeId}`,
+  AVAILABILITY_DATE_OVERRIDE: (dayId: string) =>
+    `${API_URL}/v1/mentor-settings/availabilities/day-overrides/${dayId}`,
   OAUTH_WEB_CONNECT: (provider: OAuthProvider) => `${API_URL}/v1/mentor-settings/oauth/${provider}/connect`,
   OAUTH_WEB_DISCONNECT: (provider: OAuthProvider) => `${API_URL}/v1/mentor-settings/oauth/${provider}/disconnect`,
   MENTOR: `${API_URL}/v2/community-members?profile_type=mentor`,
