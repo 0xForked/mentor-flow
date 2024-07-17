@@ -1,5 +1,5 @@
 import { convertToLocalOverideDayFormats } from "@/lib/time";
-import { AvailabilityDayOverride } from "@/lib/user";
+import { AvailabilityDayOverride, DayOverride } from "@/lib/user";
 import { Button } from "../ui/button";
 import { Loader2, TrashIcon } from "lucide-react";
 import { useAPI } from "@/hooks/useApi";
@@ -7,7 +7,7 @@ import { useMutation } from "react-query";
 import { useUserMentorStore } from "@/stores/userMentor";
 import { handleError } from "@/lib/http";
 
-export const AvailabilityDayOverrideSection = (v: { day: AvailabilityDayOverride }) => {
+export const AvailabilityDayOverrideSection = (v: { date: string, days: DayOverride[] }) => {
   const { availability, setUserAvailability } = useUserMentorStore();
   const { deleteAvailabilityDayOverride } = useAPI();
 
@@ -16,21 +16,34 @@ export const AvailabilityDayOverrideSection = (v: { day: AvailabilityDayOverride
       if (!availability?.day_overrides) return;
       const { dayId } = variables;
       const updatedAvailability = { ...availability };
-      const updatedDays = updatedAvailability?.day_overrides?.filter((day) => day.id !== dayId);
+      const updatedDays: AvailabilityDayOverride = {};
+      Object.entries(updatedAvailability?.day_overrides || {}).forEach(([dayDate, dayOverrides]) => {
+        if (dayDate !== dayId) {
+          updatedDays[dayDate] = dayOverrides;
+        }
+      });
       updatedAvailability.day_overrides = updatedDays;
       setUserAvailability(updatedAvailability);
     },
     onError: (error) => handleError(error),
   });
 
-  const formatDateOverride = (startISOTime: string, endISOTime: string): JSX.Element => {
-    const { date, startTime, endTime } = convertToLocalOverideDayFormats(startISOTime, endISOTime);
+  const formatDateOverride = (days: DayOverride[]): JSX.Element => {
+    const { date } = convertToLocalOverideDayFormats(days[0].start_date, days[0].end_date);
+
     return (
       <div>
         <span>{date}</span> <br />
-        <span className="text-gray-600">
-          {startISOTime === endISOTime ? "Unavailable" : `${startTime} – ${endTime}`}
-        </span>
+        {days.length > 1 ? days.map((day, index) => {
+          const { startTime, endTime } = convertToLocalOverideDayFormats(day.start_date, day.end_date);
+          return (
+            <span className="text-gray-600 block" key={index}>
+              {`${startTime} – ${endTime}`}
+            </span>
+          );
+        }) : (<span className="text-gray-600">
+          Unavailable
+        </span>)}
       </div>
     );
   };
@@ -41,13 +54,13 @@ export const AvailabilityDayOverrideSection = (v: { day: AvailabilityDayOverride
   };
 
   return (
-    <div className="bg-white p-4 rounded-md flex justify-between">
-      {formatDateOverride(v.day.start_date, v.day.end_date)}
+    <div className="bg-white p-4 rounded-md flex justify-between items-center">
+      {formatDateOverride(v.days)}
       <div>
         <Button
           variant="ghost"
           className="hover:text-red-500"
-          onClick={() => removeDayOverride(v.day.id)}
+          onClick={() => removeDayOverride(v.date)}
           disabled={deleteOverrideDay.isLoading}
         >
           {deleteOverrideDay.isLoading

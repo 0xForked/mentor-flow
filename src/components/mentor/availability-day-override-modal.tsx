@@ -21,7 +21,11 @@ interface TimeSelect {
   end: number;
 }
 
-interface DayOverrideUpdate {
+interface DayOverridePayload {
+  [date: string]: DayOverrideData[];
+}
+
+interface DayOverrideData {
   start_date: string;
   end_date: string;
 }
@@ -103,30 +107,38 @@ export const AvailabilityDayOverrideModal = () => {
   }
 
   const saveUpdate = () => {
-    const items: DayOverrideUpdate[] = [];
+    const items: DayOverridePayload = {};
 
     if (allDays) {
       selectedDates.forEach(date => {
         const formattedDate = formatDate(date);
-        items.push({
+        items[formattedDate] = [{
           start_date: `${formattedDate}T00:00:00.000Z`,
           end_date: `${formattedDate}T00:00:00.000Z`,
-        });
+        }];
       });
     }
 
-    // if (!allDays && selectedTimes.length > 0) {
-    //   selectedDates.forEach(date => {
-    //     selectedTimes.forEach(time => {
-    //       const startFormattedDate = replaceTimeInDate(date, time.start);
-    //       const endFormattedDate = replaceTimeInDate(date, time.end);
-    //       items.push({
-    //         start_date: `${startFormattedDate}T00:00:00.000Z`,
-    //         end_date: `${endFormattedDate}T00:00:00.000Z`,
-    //       });
-    //     })
-    //   });
-    // }
+    if (!allDays && selectedTimes.length > 0) {
+      selectedDates.forEach(date => {
+        const formattedDate = formatDate(date);
+        selectedTimes.forEach(time => {
+          const startFormattedDate = replaceTimeInDate(date, time.start);
+          const endFormattedDate = replaceTimeInDate(date, time.end);
+          if (items[formattedDate]) {
+            items[formattedDate].push({
+              start_date: startFormattedDate.toISOString(),
+              end_date: endFormattedDate.toISOString(),
+            });
+          } else {
+            items[formattedDate] = [{
+              start_date: startFormattedDate.toISOString(),
+              end_date: endFormattedDate.toISOString(),
+            }];
+          }
+        })
+      });
+    }
 
     saveChanges.mutate(JSON.stringify({ day_overrides: items }));
   }

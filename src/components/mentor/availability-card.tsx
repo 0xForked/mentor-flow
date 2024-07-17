@@ -67,7 +67,9 @@ export function AvailabilityCard() {
               </Tooltip>
             </h5>
             Add dates when your availability changes from your daily hours.
-            {availability?.day_overrides?.map((day, index) => <AvailabilityDayOverrideSection key={index} day={day} />)}
+            {availability?.day_overrides && Object.entries(availability.day_overrides).map(([date, dayOverrides]) => (
+              <AvailabilityDayOverrideSection key={date} date={date} days={dayOverrides} />
+            ))}
             <AvailabilityDayOverrideModal />
           </section>
           <CalendarEventTarget />
