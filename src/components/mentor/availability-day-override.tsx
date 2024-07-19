@@ -29,22 +29,36 @@ export const AvailabilityDayOverrideSection = (v: { date: string, days: DayOverr
   });
 
   const formatDateOverride = (days: DayOverride[]): JSX.Element => {
-    const { date } = convertToLocalOverideDayFormats(days[0].start_date, days[0].end_date);
+    const { date, startTime, endTime } = convertToLocalOverideDayFormats(days[0].start_date, days[0].end_date);
+
+    let singleContent;
+    if (days.length === 1 && days[0].start_date.includes("T00:00:00Z") && days[0].end_date.includes("T00:00:00Z")) {
+      singleContent = (
+        <span className="text-gray-600">
+          Unavailable
+        </span>
+      );
+    } else {
+      singleContent = (
+        <span className="text-gray-600 block">
+          {`${startTime} – ${endTime}`}
+        </span>
+      );
+    }
 
     return (
       <div>
         <span>{date}</span> <br />
-        {days.length > 1 ? days.map((day, index) => {
+        {days.length > 1 && days.map((day, index) => {
           const { startTime, endTime } = convertToLocalOverideDayFormats(day.start_date, day.end_date);
           return (
             <span className="text-gray-600 block" key={index}>
               {`${startTime} – ${endTime}`}
             </span>
           );
-        }) : (<span className="text-gray-600">
-          Unavailable
-        </span>)}
-      </div>
+        })}
+        {days.length === 1 && singleContent}
+      </div >
     );
   };
 

@@ -43,7 +43,7 @@ export const AvailabilityDayOverrideModal = () => {
       const availabilityData = resp?.data;
       setUserAvailability(availabilityData);
       setSelectedDates([]);
-      setSelectedTimes([]);
+      setSelectedTimes([{ start: 900, end: 1000 }]);
       setOpen(false);
     },
     onError: (error) => handleError(error),
