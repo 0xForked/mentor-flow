@@ -10,6 +10,7 @@ import { CalendarEventTarget } from "@/components/mentor/calendar-event-target";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { AvailabilityDayOverrideSection } from "./availability-day-override";
 import { AvailabilityDayOverrideModal } from "./availability-day-override-modal";
+import { Input } from "@/components/ui/input";
 
 export function AvailabilityCard() {
   const { availability } = useUserMentorStore();
@@ -71,6 +72,22 @@ export function AvailabilityCard() {
               <AvailabilityDayOverrideSection key={date} date={date} days={dayOverrides} />
             ))}
             <AvailabilityDayOverrideModal />
+          </section>
+          <section className="flex flex-col gap-4 my-4 bg-gray-100 relative rounded-md p-4">
+            <h5 className="text-md font-semibold flex items-center gap-1">
+              Booking Limits (future bookings)
+            </h5>
+            Limit how far in the future this event can be booked!
+            <div className="flex gap-4 items-center">
+              <Input
+                type="number"
+                placeholder="set your future booking limit"
+                defaultValue={availability?.limit?.future_booking}
+                onChange={(e) => console.log(e.target.value)}
+                className="w-28"
+              />
+              calendar days
+            </div>
           </section>
           <CalendarEventTarget />
           <section className="space-y-4">

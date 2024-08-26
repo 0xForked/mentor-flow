@@ -19,6 +19,7 @@ export interface Availability {
   days?: AvailabilityDay[] | null;
   day_overrides?: AvailabilityDayOverride | null;
   installed_apps?: InstalledApp | null;
+  limit: Limit | null;
 }
 
 export interface AvailabilityDay {
@@ -60,6 +61,12 @@ export interface App {
   is_default: boolean;
   must_sync: boolean;
   email?: string;
+}
+
+export interface Limit {
+  future_booking: number;
+  // booking_frequency: number;
+  // booking_duration: number;
 }
 
 export interface ProfileStatus {
