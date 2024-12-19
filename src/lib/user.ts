@@ -65,7 +65,7 @@ export interface App {
 
 export interface Limit {
   future_booking: number;
-  // booking_frequency: number;
+  booking_Lead_time: number;
   // booking_duration: number;
 }
 

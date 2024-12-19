@@ -152,6 +152,26 @@ export function useAPI() {
     return await response.json();
   };
 
+  const disconnect3rdPartyAccount = async (provider: OAuthProvider): Promise<HttpResponse<string>> => {
+    const response = await fetch(API_PATH.OAUTH_WEB_DISCONNECT(provider), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${mentorJWTValue}`,
+      },
+      credentials: "include",
+    });
+
+    if (!response.ok || response.status != 204) {
+      if (response.statusText.includes("Unauthorized")) {
+        clearMentorJWT();
+      }
+      throw new Error(`Failed to create availability: ${response.statusText}`);
+    }
+
+    return { data: "" } as HttpResponse<string>;
+  };
+
   const getMentors = async (): Promise<HttpResponse<HttpResponseList<User>>> => {
     const response = await fetch(API_PATH.MENTOR, {
       method: "GET",
@@ -294,6 +314,7 @@ export function useAPI() {
     createNewBooking,
     getMenteeSchedules,
     requestCancelBooking,
-    requestRescheduleBooking
+    requestRescheduleBooking,
+    disconnect3rdPartyAccount
   };
 }

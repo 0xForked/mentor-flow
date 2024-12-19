@@ -6,7 +6,7 @@ import { DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/c
 import { useUserMenteeStore } from "@/stores/userMentee";
 import { RescheduleMentorProfile } from "./reschedule-right-side";
 import { CalendarDate, DateValue, getLocalTimeZone, getWeeksInMonth, today } from "@internationalized/date";
-import { Calendar } from "../ui/calendar";
+import { Calendar } from "@/components/ui/aria-calendar";
 import { CalendarTimeSlots } from "./calendar-time-slots";
 import { convertToLocalTimeFormats, getMonthEndTimes } from "@/lib/time";
 import { Slots } from "@/lib/user";

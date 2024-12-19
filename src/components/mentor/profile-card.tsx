@@ -8,9 +8,13 @@ export function ProfileCard() {
 
   const statusItems = [
     { label: "Mentor", value: profileStatus.isMentor },
-    { label: "Availability", value: profileStatus.availabilityDataExist },
+    { label: "Bio & Social", value: false },
+    { label: "Mentorship Focus", value: false },
+    { label: "Accept Terms", value: false },
+    { label: "Setup Calendar & Availabiltiy", value: profileStatus.availabilityDataExist },
     { label: "Calendar App Integration", value: profileStatus.calendarAppIntegration },
     { label: "Conference App Integration", value: profileStatus.conferenceAppIntegration },
+    { label: "Add an Offer (session or plan)", value: false },
   ];
 
   return (
