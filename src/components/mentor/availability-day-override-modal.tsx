@@ -152,9 +152,9 @@ export const AvailabilityDayOverrideModal = () => {
 
   return (<>
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 gap-2 w-48" onClick={() => setOpen(true)}>
-        <PlusIcon className="w-4 h-4" />
-        Add an override
+      <DialogTrigger className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 text-primary underline-offset-4 hover:underline w-fit text-blue-500" onClick={() => setOpen(true)}>
+        <PlusIcon className="w-4 h-4 mr-2" />
+        Add holidays
       </DialogTrigger>
       <DialogContent className="max-w-max w-10/12 divide-y-2 gap-4">
         <DialogHeader>

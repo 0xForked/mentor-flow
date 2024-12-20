@@ -11,6 +11,7 @@ import { useMutation } from "react-query";
 import { useState } from "react";
 import { useGlobalStateStore } from "@/stores/state";
 import { GlobalStateKey } from "@/lib/enums";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const AvailabilityDaySection = (v: { day: AvailabilityDay }) => {
   const [loadingItem, setLoadingItem] = useState<string | null>(null);
@@ -175,3 +176,44 @@ export const AvailabilityDaySection = (v: { day: AvailabilityDay }) => {
     </>
   );
 };
+
+export const AvailabiltiyDaySectionV2 = (v: {day: AvailabilityDay}) => {
+  return (
+    <div className="flex w-full flex-col justify-between gap-4 last:mb-0 lg:flex-row lg:gap-10 lg:px-0">
+      <div className="flex h-[36px] items-center gap-4 w-[150px]">
+        <Select
+          // disabled={!isEnabled || states[GlobalStateKey.UpdateAvailabilityData]}
+          defaultValue={`${v.day.day}`}
+          // onValueChange={(value: string) => onTimeValueChange(item.id, type, `${label}_time`, value)}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select day" />
+          </SelectTrigger>
+          <SelectContent>
+             <SelectGroup>
+               {Array.from({ length: 7 }, (_, index) => (
+                <SelectItem key={index} value={`${index}`}>
+                  {intToDay(index)}
+                </SelectItem>
+              ))}
+             </SelectGroup>
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="flex sm:gap-2">
+        {v.day.enabled && (
+          <div className="flex flex-col gap-2">
+            <div className="flex gap-1 last:mb-0 sm:gap-2">
+              <div className="flex flex-row gap-2 items-center">
+                <AvailabilityTimeSection dayId={v.day.id} item={v.day} itemType="main" />
+              </div>
+              <Button variant="ghost">
+                <TrashIcon className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

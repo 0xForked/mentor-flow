@@ -1,10 +1,10 @@
-import { Clock, Globe, InfoIcon } from "lucide-react";
+import { Clock, Globe, InfoIcon, PlusIcon } from "lucide-react";
 import { useUserMentorStore } from "@/stores/userMentor";
 import { AvailabilitySkeleton } from "@/components/skeletons/availability";
 import { OAuthProvider } from "@/lib/enums";
 import { InstalledApp } from "@/components/mentor/installed-app";
 import { ConnectAccount } from "@/components/mentor/connect-account";
-import { AvailabilityDaySection } from "@/components/mentor/availability-day-section";
+import { AvailabiltiyDaySectionV2 } from "@/components/mentor/availability-day-section";
 import { getFormattedSchedule } from "@/lib/time";
 import { CalendarEventTarget } from "@/components/mentor/calendar-event-target";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -71,12 +71,16 @@ export function AvailabilityCard() {
           </section>
 
           <section className="flex flex-col gap-4 my-4 bg-gray-100 relative rounded-md p-4">
-            {availability?.days?.map((day, index) => <AvailabilityDaySection key={index} day={day} />)}
+            {availability?.days?.map((day, index) => <AvailabiltiyDaySectionV2 key={index} day={day} />)}
+            <Button className="flex-none w-fit text-blue-500" variant="link">
+              <PlusIcon className="w-4 h-4 mr-2"/>
+              Add new time widow
+            </Button>
           </section>
 
           <Accordion type="single" collapsible className="w-full mt-10">
             <AccordionItem value="item-1">
-              <AccordionTrigger>Date overrides</AccordionTrigger>
+              <AccordionTrigger>Holiday mode</AccordionTrigger>
               <AccordionContent>
                 <section className="flex flex-col gap-4 my-4 bg-gray-100 relative rounded-md p-4">
                   <h5 className="text-md font-semibold flex items-center gap-1">
@@ -100,7 +104,7 @@ export function AvailabilityCard() {
             </AccordionItem>
 
             <AccordionItem value="item-2">
-              <AccordionTrigger>Limitation</AccordionTrigger>
+              <AccordionTrigger>Allow to schedule</AccordionTrigger>
               <AccordionContent>
                 <section className="flex flex-col gap-4 my-4 bg-gray-100 relative rounded-md p-4">
                   {bookingLimit !== null && bookingLimit != 0 &&

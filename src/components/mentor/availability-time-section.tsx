@@ -250,8 +250,9 @@ export const AvailabilityTimeSection = (v: Props) => {
 
   return (
     <>
+      <span> from </span>
       {renderSelect(v.item, v.itemType, "start")}
-      <span>-</span>
+      <span> to </span>
       {renderSelect(v.item, v.itemType, "end")}
     </>
   );
