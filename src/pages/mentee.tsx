@@ -23,7 +23,7 @@ export const MenteePage = () => {
   }, [getCache, clearExpiredCache, menteeJWTKey, setJWT, clearMenteeJWT, cleanState, cleanMenteeState]);
 
   const onJWTUpdated = (jwt: string) => {
-    const cacheTime = 30 * 60 * 1000; // 30m
+    const cacheTime = 45 * 60 * 1000; // 45m
     setCache(menteeJWTKey, jwt, cacheTime);
     setJWT(jwt);
   };

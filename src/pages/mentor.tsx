@@ -19,7 +19,7 @@ export const MentorPage = () => {
   }, [getCache, clearExpiredCache, mentorJWTKey, setJWT, clearMentorJWT]);
 
   const onJWTUpdated = (jwt: string) => {
-    const cacheTime = 30 * 60 * 1000; // 30m
+    const cacheTime = 45 * 60 * 1000; // 45m
     setCache(mentorJWTKey, jwt, cacheTime);
     setJWT(jwt);
   };
