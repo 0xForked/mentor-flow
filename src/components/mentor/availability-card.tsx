@@ -1,10 +1,10 @@
-import { Clock, Globe, InfoIcon, PlusIcon } from "lucide-react";
+import { Clock, Globe, InfoIcon } from "lucide-react";
 import { useUserMentorStore } from "@/stores/userMentor";
 import { AvailabilitySkeleton } from "@/components/skeletons/availability";
 import { OAuthProvider } from "@/lib/enums";
 import { InstalledApp } from "@/components/mentor/installed-app";
 import { ConnectAccount } from "@/components/mentor/connect-account";
-import { AvailabiltiyDaySectionV2, NewAvailabiltiyDaySection } from "@/components/mentor/availability-day-section";
+import { AvailabiltiyDaySectionV2, NewAvailabiltiyDaySection } from "@/components/mentor/availability-day-section-v2";
 import { getFormattedSchedule } from "@/lib/time";
 import { CalendarEventTarget } from "@/components/mentor/calendar-event-target";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -19,18 +19,61 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
+import { useAPI } from "@/hooks/useApi";
+import { useMutation } from "react-query";
+import { OfferCard } from "./offer-card";
 
 export function AvailabilityCard() {
-  const { availability } = useUserMentorStore();
+  const { availability, setUserAvailability } = useUserMentorStore();
+  const { updateAvailability } = useAPI();
   const [bookingLimit, setBookingLimit] = useState<number | null>(0);
   const [leadTime, setLeadtime] = useState<number | null>(0);
 
+  const saveChanges = useMutation(updateAvailability, {
+    onSuccess: (resp) => {
+      const availabilityData = resp?.data;
+      setUserAvailability(availabilityData);
+      setBookingLimit(null)
+      setLeadtime(null)
+    },
+    onError: (error) => console.log(error),
+  });
+
   useEffect(() => {
      if (availability != null &&  availability.limit != null &&
-       availability?.limit?.booking_Lead_time == null) {
-       availability.limit.booking_Lead_time = 0
+       availability?.limit?.booking_lead_time == null) {
+       availability.limit.booking_lead_time = 0
      }
   }, [availability])
+
+
+  const saveBookingLimit = () => {
+    if (bookingLimit === null && bookingLimit === 0 &&
+    Number(bookingLimit) === Number(availability?.limit?.booking_lead_time)) {
+      return
+    }
+    saveChanges.mutate(
+      JSON.stringify({
+        limit: {
+          future_booking: bookingLimit
+        },
+      }),
+    );
+  }
+
+  const saveBookingLeadTime = () => {
+    if (leadTime === null && leadTime === 0 &&
+    Number(leadTime) === Number(availability?.limit?.booking_lead_time)) {
+      return
+    }
+    saveChanges.mutate(
+      JSON.stringify({
+        limit: {
+          booking_lead_time: leadTime
+        },
+      }),
+    );
+  }
 
   return (
     <>
@@ -71,7 +114,7 @@ export function AvailabilityCard() {
           </section>
 
           <section className="flex flex-col gap-4 my-4 bg-gray-100 relative rounded-md p-4">
-            {availability?.days?.map((day, index) => <AvailabiltiyDaySectionV2 key={index} day={day} />)}
+            <AvailabiltiyDaySectionV2 />
             <NewAvailabiltiyDaySection />
           </section>
 
@@ -107,7 +150,10 @@ export function AvailabilityCard() {
                   {bookingLimit !== null && bookingLimit != 0 &&
                    availability?.limit?.future_booking !== undefined &&
                    Number(bookingLimit) !== Number(availability.limit.future_booking) && (
-                    <Button className="absolute right-4 top-1/2 transform -translate-y-1/2">
+                    <Button
+                      className="absolute right-4 top-1/2 transform -translate-y-1/2"
+                      onClick={saveBookingLimit}
+                    >
                       Save
                     </Button>
                   )}
@@ -129,9 +175,12 @@ export function AvailabilityCard() {
 
                 <section className="flex flex-col gap-4 my-4 bg-gray-100 relative rounded-md p-4">
                   {leadTime !== null && leadTime != 0 &&
-                  availability?.limit?.booking_Lead_time !== undefined &&
-                  Number(leadTime) !== Number(availability.limit.booking_Lead_time) && (
-                    <Button className="absolute right-4 top-1/2 transform -translate-y-1/2">
+                  availability?.limit?.booking_lead_time !== undefined &&
+                  Number(leadTime) !== Number(availability.limit.booking_lead_time) && (
+                    <Button
+                      className="absolute right-4 top-1/2 transform -translate-y-1/2"
+                      onClick={saveBookingLeadTime}
+                    >
                       Save
                     </Button>
                   )}
@@ -143,7 +192,7 @@ export function AvailabilityCard() {
                     <Input
                       type="number"
                       placeholder="set your booking lead time"
-                      defaultValue={availability?.limit?.booking_Lead_time}
+                      defaultValue={availability?.limit?.booking_lead_time}
                       onChange={(e) => setLeadtime(parseInt(e.target.value, 10) || 0)}
                       className="w-28"
                     />
@@ -175,7 +224,7 @@ export function AvailabilityCard() {
             <AccordionItem value="item-4">
               <AccordionTrigger>Offers</AccordionTrigger>
               <AccordionContent>
-                TODO: add something here
+                <OfferCard />
               </AccordionContent>
             </AccordionItem>
           </Accordion>

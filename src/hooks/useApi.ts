@@ -1,6 +1,6 @@
 import { OAuthProvider } from "@/lib/enums";
 import { API_PATH, HttpResponse, HttpResponseList } from "@/lib/http";
-import { Availability, Booking, MentorAvailabilitySlot, User } from "@/lib/user";
+import { Availability, Booking, MentorAvailabilitySlot, Offer, User } from "@/lib/user";
 import { useMentorJWTStore } from "@/stores/mentorJWT";
 import { useMenteeJWTStore } from "@/stores/menteeJWT";
 
@@ -89,6 +89,28 @@ export function useAPI() {
 
     return await response.json();
   };
+
+  const deleteAvailabilityDay = async (p: { dayId: string; }): Promise<HttpResponse<string>> => {
+    const response = await fetch(API_PATH.AVAILABILITY_DAY(p.dayId), {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${mentorJWTValue}`,
+      },
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      if (response.statusText.includes("Unauthorized")) {
+        clearMentorJWT();
+      }
+      throw new Error(`Failed to delete day: ${response.statusText}`);
+    }
+
+    // avoid get error cause by NoContent respond
+    return { data: "" } as HttpResponse<string>;
+  };
+
 
   const deleteAvailabilityExtendTime = async (p: { dayId: string; timeId: string }): Promise<HttpResponse<string>> => {
     const response = await fetch(API_PATH.AVAILABILITY_EXTEND_TIME(p.dayId, p.timeId), {
@@ -301,11 +323,32 @@ export function useAPI() {
     return { data: "" } as HttpResponse<string>;
   };
 
+  const getOffers = async (): Promise<HttpResponse<HttpResponseList<Offer>>> => {
+    const response = await fetch(API_PATH.OFFER, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${mentorJWTValue}`,
+      },
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      if (response.statusText.includes("Unauthorized")) {
+        clearMenteeJWT();
+      }
+      throw new Error(`Failed to fetch mentor lists: ${response.statusText}`);
+    }
+
+    return await response.json();
+  };
+
   return {
     getProfile,
     getAvailability,
     createNewAvailability,
     updateAvailability,
+    deleteAvailabilityDay,
     deleteAvailabilityExtendTime,
     deleteAvailabilityDayOverride,
     createNewOAuthConnectUrl,
@@ -315,6 +358,7 @@ export function useAPI() {
     getMenteeSchedules,
     requestCancelBooking,
     requestRescheduleBooking,
-    disconnect3rdPartyAccount
+    disconnect3rdPartyAccount,
+    getOffers
   };
 }

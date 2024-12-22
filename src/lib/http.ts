@@ -6,6 +6,8 @@ const API_URL = "http://127.0.0.1:3000/api";
 export const API_PATH = {
   PROFILE: `${API_URL}/v2/accounts/detail`,
   AVAILABILITY: `${API_URL}/v1/mentor-settings/availabilities`,
+  AVAILABILITY_DAY: (dayId: string) =>
+    `${API_URL}/v1/mentor-settings/availabilities/days/${dayId}`,
   AVAILABILITY_EXTEND_TIME: (dayId: string, timeId: string) =>
     `${API_URL}/v1/mentor-settings/availabilities/days/${dayId}/extend-times/${timeId}`,
   AVAILABILITY_DATE_OVERRIDE: (dayId: string) =>
@@ -19,6 +21,7 @@ export const API_PATH = {
   MENTEE_SCHEDULES: `${API_URL}/v1/mentor-schedules/my-bookings`,
   CANCEL_BOOKING: (bookingId: string) => `${API_URL}/v1/mentor-schedules/${bookingId}/cancel`,
   RESCHEDULE_BOOKING: (bookingId: string) => `${API_URL}/v1/mentor-schedules/${bookingId}/reschedule`,
+  OFFER: `${API_URL}/v1/mentor-settings/offers`,
 };
 
 export interface HttpResponse<T> {

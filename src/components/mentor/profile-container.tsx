@@ -1,5 +1,5 @@
-import { User, Availability } from "@/lib/user";
-import { handleError, HttpResponse } from "@/lib/http";
+import { User, Availability, Offer } from "@/lib/user";
+import { handleError, HttpResponse, HttpResponseList } from "@/lib/http";
 import { PackageOpenIcon } from "lucide-react";
 import { NewAvailabilityDialog } from "@/components/mentor/new-availability-dialog";
 import { ProfileCard } from "@/components/mentor/profile-card";
@@ -11,8 +11,8 @@ import { useGlobalStateStore } from "@/stores/state";
 import { GlobalStateKey } from "@/lib/enums";
 
 export function ProfileContainer() {
-  const { getProfile, getAvailability } = useAPI();
-  const { setUserProfile, setUserAvailability } = useUserMentorStore();
+  const { getProfile, getAvailability, getOffers } = useAPI();
+  const { setUserProfile, setUserAvailability, setOffers } = useUserMentorStore();
   const { states, setState } = useGlobalStateStore();
 
   const profile = useQuery<HttpResponse<User>>("profile", getProfile, {
@@ -31,6 +31,16 @@ export function ProfileContainer() {
       if (error instanceof Error && error.message?.includes("Not Found")) {
         setState(GlobalStateKey.DisplayNoAvailabilityModal, true);
       }
+    },
+    retry: false,
+  });
+
+  useQuery<HttpResponse<HttpResponseList<Offer>>>("offers", getOffers, {
+    onSuccess: (resp) => {
+      setOffers(resp?.data?.list || []);
+    },
+    onError: (error: unknown) => {
+      handleError(error);
     },
     retry: false,
   });

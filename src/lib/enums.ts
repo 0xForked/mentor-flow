@@ -10,7 +10,8 @@ export enum InstalledAppType {
 
 export enum GlobalStateKey {
   DisplayNoAvailabilityModal = "display_no_availability_modal",
-  UpdateAvailabilityData = "update_availability_data",
+  UpdateAvailabilityDayData = "update_availability_day_data",
+  UpdateAvailabilityTimeData = "update_availability_time_data",
   MentorCalendarDialog = "mentor_calendar_dialog",
   // FOR BOOKING DIALOG INITIALIZATION
   CurrentDate = "current_date",

@@ -65,7 +65,7 @@ export interface App {
 
 export interface Limit {
   future_booking: number;
-  booking_Lead_time: number;
+  booking_lead_time: number;
   // booking_duration: number;
 }
 
@@ -100,4 +100,22 @@ export interface Booking {
   description: string;
   meeting_url: string;
   additional_notes: string;
+}
+
+
+export interface Offer {
+  id: string;
+  enabled: boolean;
+  profile_type_id: string;
+  mentorship_areas_id: string[];
+  type: string;
+  description: string;
+  session_durations: SessionDuration
+}
+
+export interface SessionDuration {
+  id: string;
+  number_of_sessions: number;
+  duration_minute: number;
+  coin_price: number;
 }

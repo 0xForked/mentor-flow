@@ -1,15 +1,17 @@
-import { Availability, ProfileStatus, User } from "@/lib/user";
+import { Availability, Offer, ProfileStatus, User } from "@/lib/user";
 import { create } from "zustand";
 
 interface States {
   profile: User | null;
   availability: Availability | null;
   profileStatus: ProfileStatus;
+  offers: Offer[] | null;
 }
 
 interface Actions {
   setUserProfile: (profile: User | null) => void;
   setUserAvailability: (availability: Availability | null) => void;
+  setOffers: (offers: Offer[] | null) => void;
 }
 
 export const useUserMentorStore = create<States & Actions>((set, get) => {
@@ -51,6 +53,7 @@ export const useUserMentorStore = create<States & Actions>((set, get) => {
       calendarAppIntegration: false,
       conferenceAppIntegration: false,
     },
+    offers: null,
     setUserProfile: (profile: User | null) => {
       set({ profile });
       updateProfileStatus();
@@ -58,6 +61,9 @@ export const useUserMentorStore = create<States & Actions>((set, get) => {
     setUserAvailability: (availability: Availability | null) => {
       set({ availability });
       updateProfileStatus();
+    },
+    setOffers: (offers: Offer[] | null) => {
+      set({ offers });
     },
   };
 });

@@ -38,7 +38,7 @@ export const AvailabilityTimeSection = (v: Props) => {
   const onTimeValueChange = async (id: string, type: string, key: string, val: string) => {
     if (!id && !val) return;
 
-    setState(GlobalStateKey.UpdateAvailabilityData, true);
+    setState(GlobalStateKey.UpdateAvailabilityTimeData, true);
     setState(`select_${id}_${key}`, true);
 
     const availabilityDay = findAvailabilityDay();
@@ -226,7 +226,7 @@ export const AvailabilityTimeSection = (v: Props) => {
       </Skeleton>
     ) : (
       <Select
-        disabled={!isEnabled || states[GlobalStateKey.UpdateAvailabilityData]}
+        disabled={!isEnabled || states[GlobalStateKey.UpdateAvailabilityTimeData]}
         defaultValue={intToTime(item[label === "start" ? "start_time" : "end_time"])}
         onValueChange={(value: string) => onTimeValueChange(item.id, type, `${label}_time`, value)}
       >
